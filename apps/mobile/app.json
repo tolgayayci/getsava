@@ -9,10 +9,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "app.savafi.mobile"
+      "bundleIdentifier": "app.getsava.mobile"
     },
     "android": {
-      "package": "app.savafi.mobile"
+      "package": "app.getsava.mobile"
     },
     "web": {
       "bundler": "metro",
