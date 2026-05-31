@@ -22,11 +22,15 @@ web-build/
 # Cloudflare Workers / Wrangler
 .wrangler/
 .dev.vars
+.dev.vars.*
 
-# Env
+# Env (secrets never committed; .env.example stays tracked)
 .env
 .env.local
 .env.*.local
+
+# Claude Code runtime artifacts
+.claude/scheduled_tasks.lock
 
 # Editors / OS
 .DS_Store

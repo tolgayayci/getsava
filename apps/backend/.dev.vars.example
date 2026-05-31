@@ -1,4 +1,9 @@
 # Copy to apps/backend/.dev.vars (gitignored) for local `wrangler dev`.
 # Production/staging secrets are set with `wrangler secret put` (YK-487).
-# None are required for the GET /health scaffold.
-# DATABASE_URL=
+# Server-side ONLY — never shipped to the client bundle.
+#
+# Privy (App ID is public, but the SECRET lives here, never EXPO_PUBLIC_*):
+# PRIVY_APP_ID=
+# PRIVY_APP_SECRET=
+#
+# DATABASE_URL=   (Neon via Hyperdrive — YK-487)

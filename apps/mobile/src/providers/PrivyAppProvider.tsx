@@ -10,13 +10,17 @@ import type { ComponentType, ReactNode } from 'react';
  * real. Credentials come from EXPO_PUBLIC_* and are configured in the Privy
  * dashboard (human task YK-455).
  *
+ * The App ID is public; the App SECRET is server-side only (backend) and must
+ * never reach this bundle. `clientId` is an optional Privy "app client" id —
+ * passed through when set, omitted otherwise.
+ *
  * Embedded Stellar wallet provisioning (useCreateWallet, chainType:'stellar')
  * is a later story (YK-458) — this one only installs + mounts the provider.
  */
 
 interface PrivyProviderProps {
   appId: string;
-  clientId: string;
+  clientId?: string;
   children: ReactNode;
 }
 
@@ -45,8 +49,8 @@ const privyModule = loadPrivy();
 const APP_ID = process.env.EXPO_PUBLIC_PRIVY_APP_ID ?? '';
 const CLIENT_ID = process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID ?? '';
 
-/** True only when the native module is present AND credentials are configured. */
-export const isPrivyConfigured = privyModule !== null && APP_ID !== '' && CLIENT_ID !== '';
+/** True when the native module is present AND the App ID is configured. */
+export const isPrivyConfigured = privyModule !== null && APP_ID !== '';
 
 /**
  * `usePrivy`, or a no-op fallback returning a not-ready client. Only call it
@@ -58,10 +62,11 @@ export const usePrivyClient: () => PrivyClient =
   privyModule?.usePrivy ?? (() => ({ isReady: false, user: null }));
 
 export function PrivyAppProvider({ children }: { children: ReactNode }) {
-  if (privyModule !== null && APP_ID !== '' && CLIENT_ID !== '') {
+  if (privyModule !== null && APP_ID !== '') {
     const { PrivyProvider } = privyModule;
+    const clientIdProp = CLIENT_ID !== '' ? { clientId: CLIENT_ID } : {};
     return (
-      <PrivyProvider appId={APP_ID} clientId={CLIENT_ID}>
+      <PrivyProvider appId={APP_ID} {...clientIdProp}>
         {children}
       </PrivyProvider>
     );
@@ -69,7 +74,7 @@ export function PrivyAppProvider({ children }: { children: ReactNode }) {
 
   if (privyModule !== null) {
     console.warn(
-      '[Sava] Privy module present but EXPO_PUBLIC_PRIVY_APP_ID / EXPO_PUBLIC_PRIVY_CLIENT_ID are missing — auth disabled. Set them in apps/mobile/.env.local (Privy dashboard task YK-455).',
+      '[Sava] Privy module present but EXPO_PUBLIC_PRIVY_APP_ID is missing — auth disabled. Set it in apps/mobile/.env.local (Privy dashboard task YK-455).',
     );
   } else {
     console.warn(
