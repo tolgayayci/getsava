@@ -1,0 +1,39 @@
+{
+  "common": {
+    "appName": "Sava",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "back": "Back",
+    "retry": "Retry",
+    "loading": "Loading…",
+    "done": "Done"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "turkish": "Türkçe"
+  },
+  "onboarding": {
+    "title": "Earn crypto yield, always in your control",
+    "subtitle": "Add Turkish Lira, hold USDC on Stellar, and earn variable yield. Non-custodial — your keys, your funds.",
+    "getStarted": "Get started"
+  },
+  "auth": {
+    "continueWithEmail": "Continue with email",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
+    "emailLabel": "Email address",
+    "otpTitle": "Enter the 6-digit code",
+    "otpSentTo": "We sent a code to {email}",
+    "resendCode": "Resend code"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "No connection. Check your internet and try again.",
+    "invalidCode": "That code is invalid or expired."
+  },
+  "risk": {
+    "notABank": "Sava is not a bank. Yields are variable and not promised.",
+    "testnet": "TESTNET"
+  }
+}

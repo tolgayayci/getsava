@@ -3,27 +3,30 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.ts",
-  "description": "Sava Expo app. Scaffold renders a default screen; auth/wallet/screens land in D1/D7+. jest-expo is wired with the first UI story.",
+  "description": "Sava Expo app — Privy auth + i18n wired; screens land as Claude Design delivers them.",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@exodus/patch-broken-hermes-typed-arrays": "1.0.0-alpha.1",
     "@getsava/ui": "workspace:*",
     "@privy-io/expo": "^0.67.1",
     "@privy-io/expo-native-extensions": "^0.0.11",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "buffer": "^6.0.3",
     "expo": "~56.0.8",
-    "expo-apple-authentication": "~56.0.4",
     "expo-application": "~56.0.3",
+    "expo-apple-authentication": "~56.0.4",
     "expo-constants": "~56.0.16",
     "expo-crypto": "~56.0.4",
     "expo-dev-client": "~56.0.18",
     "expo-linking": "~56.0.13",
+    "expo-localization": "~17.0.7",
     "expo-secure-store": "~56.0.4",
     "expo-status-bar": "~56.0.4",
     "expo-web-browser": "~56.0.5",
@@ -31,10 +34,14 @@
     "react-native": "0.85.3",
     "react-native-get-random-values": "~1.11.0",
     "react-native-passkeys": "^0.4.1",
+    "react-native-qrcode-styled": "^0.3.3",
+    "react-native-safe-area-context": "^5.6.1",
+    "react-native-svg": "^15.13.0",
     "react-native-webview": "13.16.1"
   },
   "devDependencies": {
     "@types/react": "~19.2.0",
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.7"
   }
 }

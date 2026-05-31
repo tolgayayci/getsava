@@ -1,0 +1,39 @@
+{
+  "common": {
+    "appName": "Sava",
+    "continue": "Devam et",
+    "cancel": "İptal",
+    "back": "Geri",
+    "retry": "Tekrar dene",
+    "loading": "Yükleniyor…",
+    "done": "Tamam"
+  },
+  "language": {
+    "label": "Dil",
+    "english": "English",
+    "turkish": "Türkçe"
+  },
+  "onboarding": {
+    "title": "Kripto getirinizi kazanın, her zaman sizin kontrolünüzde",
+    "subtitle": "Türk Lirası ekleyin, Stellar üzerinde USDC tutun ve değişken getiri kazanın. Saklamasız — anahtarlar ve paranız sizde.",
+    "getStarted": "Başlayın"
+  },
+  "auth": {
+    "continueWithEmail": "E-posta ile devam et",
+    "continueWithGoogle": "Google ile devam et",
+    "continueWithApple": "Apple ile devam et",
+    "emailLabel": "E-posta adresi",
+    "otpTitle": "6 haneli kodu girin",
+    "otpSentTo": "{email} adresine bir kod gönderdik",
+    "resendCode": "Kodu yeniden gönder"
+  },
+  "errors": {
+    "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+    "network": "Bağlantı yok. İnternetinizi kontrol edip tekrar deneyin.",
+    "invalidCode": "Bu kod geçersiz veya süresi dolmuş."
+  },
+  "risk": {
+    "notABank": "Sava bir banka değildir. Getiriler değişkendir ve garanti edilmez.",
+    "testnet": "TESTNET"
+  }
+}
