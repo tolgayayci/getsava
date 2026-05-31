@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Stellar helpers — SEP-10, raw-hash signing, trustlines, simulate-before-submit. Built in later D1/D6 stories.",
+  "description": "Stellar helpers — config, Horizon REST, Privy raw-hash signing, USDC trustline + wallet provisioning. SEP-10 + simulate-before-submit land in D6/D3.",
   "exports": {
     ".": "./src/index.ts"
   },
@@ -11,11 +11,13 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
+  "dependencies": {
+    "@getsava/types": "workspace:*",
+    "@stellar/stellar-base": "13.1.0"
+  },
   "devDependencies": {
+    "@types/node": "^24.0.0",
     "typescript": "^6.0.0",
     "vitest": "^4.1.7"
-  },
-  "dependencies": {
-    "@stellar/stellar-sdk": "^15.1.0"
   }
 }

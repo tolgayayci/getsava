@@ -20,12 +20,13 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "buffer": "^6.0.3",
     "expo": "~56.0.8",
-    "expo-application": "~56.0.3",
     "expo-apple-authentication": "~56.0.4",
+    "expo-application": "~56.0.3",
     "expo-constants": "~56.0.16",
     "expo-crypto": "~56.0.4",
     "expo-dev-client": "~56.0.18",
     "expo-linking": "~56.0.13",
+    "expo-local-authentication": "~56.0.4",
     "expo-localization": "~17.0.7",
     "expo-secure-store": "~56.0.4",
     "expo-status-bar": "~56.0.4",
@@ -37,7 +38,8 @@
     "react-native-qrcode-styled": "^0.3.3",
     "react-native-safe-area-context": "^5.6.1",
     "react-native-svg": "^15.13.0",
-    "react-native-webview": "13.16.1"
+    "react-native-webview": "13.16.1",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@types/react": "~19.2.0",
