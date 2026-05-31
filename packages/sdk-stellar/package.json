@@ -14,5 +14,8 @@
   "devDependencies": {
     "typescript": "^6.0.0",
     "vitest": "^4.1.7"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^15.1.0"
   }
 }

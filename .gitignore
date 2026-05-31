@@ -46,5 +46,8 @@ target/
 vendor/
 tmp/
 
+# Claude Code runtime artifacts (scheduled-task lock, etc.)
+.claude/scheduled_tasks.lock
+
 # Read-only reference MVP (kept on disk, never committed) — see README
 reference-mvp/

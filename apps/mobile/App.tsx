@@ -1,15 +1,18 @@
-import { UI_PACKAGE } from '@getsava/ui';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import { PrivyStatus } from './src/components/PrivyStatus';
+import { PrivyAppProvider } from './src/providers/PrivyAppProvider';
 
 export function App() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sava</Text>
-      <Text style={styles.subtitle}>Monorepo scaffold · YK-486</Text>
-      <Text style={styles.meta}>linked workspace package: {UI_PACKAGE}</Text>
-      <StatusBar style="auto" />
-    </View>
+    <PrivyAppProvider>
+      <View style={styles.container}>
+        <Text style={styles.title}>Sava</Text>
+        <Text style={styles.subtitle}>Privy integration</Text>
+        <PrivyStatus />
+        <StatusBar style="auto" />
+      </View>
+    </PrivyAppProvider>
   );
 }
 
@@ -28,10 +31,5 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14,
     opacity: 0.7,
-  },
-  meta: {
-    marginTop: 16,
-    fontSize: 12,
-    opacity: 0.5,
   },
 });
