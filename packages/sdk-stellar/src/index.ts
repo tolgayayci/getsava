@@ -1,9 +1,29 @@
-/**
- * @getsava/sdk-stellar — Stellar/Soroban helpers shared by mobile + backend:
- * SEP-10 challenge/verify, Privy raw-hash signing, trustline setup, and the
- * simulate-before-submit inspection (auth-entry allowlist, fee ceiling, decoded
- * effect). Added by their stories (YK-457 / YK-488 / D6).
- *
- * Placeholder export keeps the package importable until then.
- */
-export const SDK_STELLAR_PACKAGE = '@getsava/sdk-stellar';
+export { type AssetRef, NETWORKS, type NetworkConfig, networkConfig } from './config';
+export {
+  accountExists,
+  type Balances,
+  fetchAccount,
+  fundWithFriendbot,
+  getBalances,
+  type HorizonAccount,
+  HorizonError,
+  hasUsdcTrustline,
+  readBalances,
+  submitTransaction,
+} from './horizon';
+export {
+  ensureUsdcTrustline,
+  type ProvisioningState,
+  type ProvisionOptions,
+  type ProvisionResult,
+} from './provisioning';
+export {
+  attachSignature,
+  type Hex,
+  type SignRawHashFn,
+  type SignRawHashInput,
+  signTransaction,
+  transactionHashHex,
+} from './signing';
+export { buildUsdcTrustlineXdr, DEFAULT_FEE, DEFAULT_TIMEOUT_SECONDS } from './trustline';
+export { findStellarAddress, type PrivyUserLike } from './wallet';

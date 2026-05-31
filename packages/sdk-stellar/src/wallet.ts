@@ -4,17 +4,35 @@
  * Privy's Stellar embedded wallet is a curve-signing embedded-wallet account
  * with `chain_type: 'stellar'` — unlike EVM/Solana wallets it does NOT carry a
  * `type: 'wallet'` field, so we match on chain_type. Accepts both snake_case
- * (`linked_accounts`/`chain_type`) and camelCase shapes Privy may return.
+ * (`linked_accounts`/`chain_type`) and camelCase shapes Privy may return, and
+ * tolerates loosely-typed (`unknown`) account arrays from the Privy SDK.
  */
-export interface LinkedAccountLike {
-  readonly chain_type?: string;
-  readonly chainType?: string;
-  readonly address?: string;
+export interface PrivyUserLike {
+  readonly linked_accounts?: readonly unknown[];
+  readonly linkedAccounts?: readonly unknown[];
 }
 
-export interface PrivyUserLike {
-  readonly linked_accounts?: readonly LinkedAccountLike[];
-  readonly linkedAccounts?: readonly LinkedAccountLike[];
+interface LinkedAccountShape {
+  readonly chain_type?: unknown;
+  readonly chainType?: unknown;
+  readonly address?: unknown;
+}
+
+function chainTypeOf(account: unknown): string | null {
+  if (typeof account !== 'object' || account === null) {
+    return null;
+  }
+  const a = account as LinkedAccountShape;
+  const chain = a.chain_type ?? a.chainType;
+  return typeof chain === 'string' ? chain : null;
+}
+
+function addressOf(account: unknown): string | null {
+  if (typeof account !== 'object' || account === null) {
+    return null;
+  }
+  const { address } = account as LinkedAccountShape;
+  return typeof address === 'string' ? address : null;
 }
 
 export function findStellarAddress(user: PrivyUserLike | null | undefined): string | null {
@@ -22,6 +40,6 @@ export function findStellarAddress(user: PrivyUserLike | null | undefined): stri
     return null;
   }
   const accounts = user.linked_accounts ?? user.linkedAccounts ?? [];
-  const stellar = accounts.find((a) => (a.chain_type ?? a.chainType) === 'stellar');
-  return stellar?.address ?? null;
+  const stellar = accounts.find((a) => chainTypeOf(a) === 'stellar');
+  return stellar ? addressOf(stellar) : null;
 }

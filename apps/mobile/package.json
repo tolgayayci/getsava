@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@exodus/patch-broken-hermes-typed-arrays": "1.0.0-alpha.1",
+    "@getsava/sdk-stellar": "workspace:*",
+    "@getsava/types": "workspace:*",
     "@getsava/ui": "workspace:*",
     "@privy-io/expo": "^0.67.1",
     "@privy-io/expo-native-extensions": "^0.0.11",

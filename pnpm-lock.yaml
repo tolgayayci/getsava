@@ -51,6 +51,12 @@ importers:
       '@exodus/patch-broken-hermes-typed-arrays':
         specifier: 1.0.0-alpha.1
         version: 1.0.0-alpha.1
+      '@getsava/sdk-stellar':
+        specifier: workspace:*
+        version: link:../../packages/sdk-stellar
+      '@getsava/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@getsava/ui':
         specifier: workspace:*
         version: link:../../packages/ui
