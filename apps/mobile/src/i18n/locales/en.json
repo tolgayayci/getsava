@@ -2,9 +2,9 @@
   "common": {
     "appName": "Sava",
     "continue": "Continue",
-    "cancel": "Cancel",
     "back": "Back",
-    "retry": "Retry",
+    "cancel": "Cancel",
+    "retry": "Try again",
     "loading": "Loading…",
     "done": "Done"
   },
@@ -14,18 +14,60 @@
     "turkish": "Türkçe"
   },
   "onboarding": {
-    "title": "Earn crypto yield, always in your control",
-    "subtitle": "Add Turkish Lira, hold USDC on Stellar, and earn variable yield. Non-custodial — your keys, your funds.",
-    "getStarted": "Get started"
+    "eyebrow": "Before you start",
+    "title": "A few things to know\nabout Sava",
+    "p1": "Sava is not a bank.",
+    "p1d": "Your money isn't a deposit and isn't covered by any bank guarantee scheme.",
+    "p2": "The rate is variable.",
+    "p2d": "Yield changes daily with the market. It is never fixed and never guaranteed.",
+    "p3": "Your funds are at risk.",
+    "p3d": "You could get back less than you put in. Sava is non-custodial — your keys stay with you.",
+    "ack1": "I understand Sava is not a bank and my funds are not guaranteed.",
+    "ack2": "I understand the rate is variable and I could lose money.",
+    "cta": "I understand — continue",
+    "ctaWait": "Read & acknowledge above",
+    "terms": "Read full Terms",
+    "privacy": "Privacy",
+    "reacceptTitle": "Our terms have changed",
+    "reacceptBody": "We've updated our Terms of Use. Please review and accept the new version to continue.",
+    "reacceptCta": "Accept updated terms"
   },
   "auth": {
-    "continueWithEmail": "Continue with email",
-    "continueWithGoogle": "Continue with Google",
-    "continueWithApple": "Continue with Apple",
+    "title": "Sign in or create\nyour account",
+    "subtitle": "Enter your email — we'll set everything up, including your wallet, automatically.",
     "emailLabel": "Email address",
-    "otpTitle": "Enter the 6-digit code",
-    "otpSentTo": "We sent a code to {email}",
-    "resendCode": "Resend code"
+    "emailPlaceholder": "you@email.com",
+    "emailError": "Enter a valid email address",
+    "continueEmail": "Continue with email",
+    "or": "or",
+    "google": "Continue with Google",
+    "apple": "Continue with Apple",
+    "legal": "By continuing you accept our Terms and Privacy Policy.",
+    "netError": "Connection problem. Check your network and try again."
+  },
+  "otp": {
+    "title": "Enter the 6-digit code",
+    "sentTo": "We sent a code to {email}",
+    "error": "That code isn't right. Check and re-enter.",
+    "resendIn": "Resend code in {seconds}",
+    "resend": "Resend code",
+    "resent": "New code sent"
+  },
+  "provisioning": {
+    "title": "Setting up your account",
+    "s1": "Creating your secure wallet",
+    "s2": "Securing your keys",
+    "s3": "Almost ready",
+    "note": "This takes a few seconds. Your keys are generated on your device.",
+    "done": "You're all set",
+    "failedTitle": "Setup didn't finish",
+    "failedNote": "Something interrupted setup. Your funds are safe — tap to try again.",
+    "retry": "Try again"
+  },
+  "home": {
+    "title": "You're signed in",
+    "subtitle": "Your wallet is ready. The Home screen lands with the app shell.",
+    "signOut": "Sign out"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -33,7 +75,7 @@
     "invalidCode": "That code is invalid or expired."
   },
   "risk": {
-    "notABank": "Sava is not a bank. Yields are variable and not promised.",
+    "notABank": "Sava is not a bank. Yields are variable and not guaranteed.",
     "testnet": "TESTNET"
   }
 }

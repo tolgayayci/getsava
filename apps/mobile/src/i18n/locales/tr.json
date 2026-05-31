@@ -2,8 +2,8 @@
   "common": {
     "appName": "Sava",
     "continue": "Devam et",
-    "cancel": "İptal",
     "back": "Geri",
+    "cancel": "Vazgeç",
     "retry": "Tekrar dene",
     "loading": "Yükleniyor…",
     "done": "Tamam"
@@ -14,18 +14,60 @@
     "turkish": "Türkçe"
   },
   "onboarding": {
-    "title": "Kripto getirinizi kazanın, her zaman sizin kontrolünüzde",
-    "subtitle": "Türk Lirası ekleyin, Stellar üzerinde USDC tutun ve değişken getiri kazanın. Saklamasız — anahtarlar ve paranız sizde.",
-    "getStarted": "Başlayın"
+    "eyebrow": "Başlamadan önce",
+    "title": "Sava hakkında\nbilmeniz gerekenler",
+    "p1": "Sava bir banka değildir.",
+    "p1d": "Paranız bir mevduat değildir ve herhangi bir banka garanti sistemi kapsamında değildir.",
+    "p2": "Oran değişkendir.",
+    "p2d": "Getiri piyasayla birlikte her gün değişir. Asla sabit değildir ve garanti edilmez.",
+    "p3": "Paranız risk altındadır.",
+    "p3d": "Yatırdığınızdan daha azını geri alabilirsiniz. Sava saklamasızdır — anahtarlar sizde kalır.",
+    "ack1": "Sava'nın banka olmadığını ve paramın garanti edilmediğini anlıyorum.",
+    "ack2": "Oranın değişken olduğunu ve para kaybedebileceğimi anlıyorum.",
+    "cta": "Anladım — devam et",
+    "ctaWait": "Yukarıdakileri okuyup onaylayın",
+    "terms": "Koşulların tamamını oku",
+    "privacy": "Gizlilik",
+    "reacceptTitle": "Koşullarımız değişti",
+    "reacceptBody": "Kullanım Koşulları'nı güncelledik. Devam etmek için lütfen yeni sürümü inceleyip kabul edin.",
+    "reacceptCta": "Güncel koşulları kabul et"
   },
   "auth": {
-    "continueWithEmail": "E-posta ile devam et",
-    "continueWithGoogle": "Google ile devam et",
-    "continueWithApple": "Apple ile devam et",
+    "title": "Giriş yap veya\nhesabını oluştur",
+    "subtitle": "E-postanı gir — cüzdanın dahil her şeyi otomatik olarak biz ayarlayalım.",
     "emailLabel": "E-posta adresi",
-    "otpTitle": "6 haneli kodu girin",
-    "otpSentTo": "{email} adresine bir kod gönderdik",
-    "resendCode": "Kodu yeniden gönder"
+    "emailPlaceholder": "sen@eposta.com",
+    "emailError": "Geçerli bir e-posta adresi girin",
+    "continueEmail": "E-posta ile devam et",
+    "or": "veya",
+    "google": "Google ile devam et",
+    "apple": "Apple ile devam et",
+    "legal": "Devam ederek Koşullar'ı ve Gizlilik Politikası'nı kabul edersiniz.",
+    "netError": "Bağlantı sorunu. Ağınızı kontrol edip tekrar deneyin."
+  },
+  "otp": {
+    "title": "6 haneli kodu girin",
+    "sentTo": "Kodu şuraya gönderdik: {email}",
+    "error": "Bu kod doğru değil. Kontrol edip yeniden girin.",
+    "resendIn": "Yeniden gönderme: {seconds}",
+    "resend": "Kodu yeniden gönder",
+    "resent": "Yeni kod gönderildi"
+  },
+  "provisioning": {
+    "title": "Hesabınız hazırlanıyor",
+    "s1": "Güvenli cüzdanınız oluşturuluyor",
+    "s2": "Anahtarlarınız güvene alınıyor",
+    "s3": "Neredeyse hazır",
+    "note": "Bu birkaç saniye sürer. Anahtarlarınız cihazınızda üretilir.",
+    "done": "Her şey hazır",
+    "failedTitle": "Kurulum tamamlanamadı",
+    "failedNote": "Kurulum kesintiye uğradı. Paranız güvende — tekrar denemek için dokunun.",
+    "retry": "Tekrar dene"
+  },
+  "home": {
+    "title": "Giriş yaptınız",
+    "subtitle": "Cüzdanınız hazır. Ana ekran, uygulama kabuğuyla birlikte gelecek.",
+    "signOut": "Çıkış yap"
   },
   "errors": {
     "generic": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",

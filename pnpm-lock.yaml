@@ -51,6 +51,12 @@ importers:
       '@exodus/patch-broken-hermes-typed-arrays':
         specifier: 1.0.0-alpha.1
         version: 1.0.0-alpha.1
+      '@expo-google-fonts/hanken-grotesk':
+        specifier: ^0.4.3
+        version: 0.4.3
+      '@expo-google-fonts/spline-sans-mono':
+        specifier: ^0.4.2
+        version: 0.4.2
       '@getsava/sdk-stellar':
         specifier: workspace:*
         version: link:../../packages/sdk-stellar
@@ -90,6 +96,9 @@ importers:
       expo-dev-client:
         specifier: ~56.0.18
         version: 56.0.18(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))
+      expo-font:
+        specifier: ~56.0.5
+        version: 56.0.5(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))(react@19.2.6)
       expo-linking:
         specifier: ~56.0.13
         version: 56.0.13(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))(react@19.2.6)
@@ -132,9 +141,6 @@ importers:
       react-native-webview:
         specifier: 13.16.1
         version: 13.16.1(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))(react@19.2.6)
-      zustand:
-        specifier: ^5.0.14
-        version: 5.0.14(@types/react@19.2.15)(react@19.2.6)
     devDependencies:
       '@types/react':
         specifier: ~19.2.0
@@ -988,6 +994,12 @@ packages:
 
   '@exodus/patch-broken-hermes-typed-arrays@1.0.0-alpha.1':
     resolution: {integrity: sha512-oYv+2IJxaNVTnF7lJqS+wrW0JisE9kcKlgQnkrdhtlsfRmFlcYPdPSO8eaIXKHKkzKndy3I+ZzTELg+BVi3vSg==}
+
+  '@expo-google-fonts/hanken-grotesk@0.4.3':
+    resolution: {integrity: sha512-TZn/Ux+nCxEjG/zAenCFbEhOAPxSXN3lo2YU2jHcPsNBPFeicm8feQStL81igJuAwJLCn62VvEOdTtmVEBDl0g==}
+
+  '@expo-google-fonts/spline-sans-mono@0.4.2':
+    resolution: {integrity: sha512-5gTpvnX7BsEEa7VAqEll/rgqJT0joKTTHU/Dh+ykZ9oDxHMvVmKDvW/6VLKt3D6ODln/dUo/BfkwK6D5i/3e1w==}
 
   '@expo/cli@56.1.13':
     resolution: {integrity: sha512-7n5VzlBr7TKW0BgWgpEopWy+v8buPhMvbSEsuXD+bI1YIJBopkfWAub0qTvlc357E8wWOvV5MJXYyoeRvoOjoQ==}
@@ -4591,6 +4603,10 @@ snapshots:
     optional: true
 
   '@exodus/patch-broken-hermes-typed-arrays@1.0.0-alpha.1': {}
+
+  '@expo-google-fonts/hanken-grotesk@0.4.3': {}
+
+  '@expo-google-fonts/spline-sans-mono@0.4.2': {}
 
   '@expo/cli@56.1.13(@expo/dom-webview@56.0.5)(expo-constants@56.0.16(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6)))(expo-font@56.0.5(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))(react@19.2.6))(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))(react@19.2.6)(typescript@6.0.3)':
     dependencies:
