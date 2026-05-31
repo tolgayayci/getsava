@@ -1,0 +1,13 @@
+# Git hooks (installed by the root `prepare` script via `lefthook install`).
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: '*.{js,jsx,ts,tsx,json,jsonc,mjs,cjs}'
+      run: pnpm biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+
+commit-msg:
+  commands:
+    conventional:
+      # Enforces conventional commits and rejects Linear/issue IDs (e.g. "YK-486").
+      run: pnpm tsx packages/config/bin/check-commit-msg.ts {1}

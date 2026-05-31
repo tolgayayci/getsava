@@ -1,0 +1,25 @@
+{
+  "name": "@getsava/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.ts",
+  "description": "Sava Expo app. Scaffold renders a default screen; auth/wallet/screens land in D1/D7+. jest-expo is wired with the first UI story.",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@getsava/ui": "workspace:*",
+    "expo": "~56.0.8",
+    "expo-status-bar": "~56.0.4",
+    "react": "19.2.6",
+    "react-native": "0.85.3"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.0",
+    "typescript": "^6.0.0"
+  }
+}

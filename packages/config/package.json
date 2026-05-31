@@ -1,0 +1,21 @@
+{
+  "name": "@getsava/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared build config (tsconfig + biome) and the CI guard logic (i18n parity, marketing language, commit messages).",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./biome.json": "./biome.json"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.7"
+  }
+}

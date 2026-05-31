@@ -1,0 +1,8 @@
+name = "sava-backend"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Real bindings (Hyperdrive → Neon Postgres, secrets, staging + production
+# environments) are added in YK-487 (T1.D6.S2). This scaffold serves GET /health
+# only. Secrets are set via `wrangler secret put`, never committed.

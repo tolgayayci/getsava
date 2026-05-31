@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Sava",
+    "slug": "sava",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "scheme": "sava",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.savafi.mobile"
+    },
+    "android": {
+      "package": "app.savafi.mobile"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    }
+  }
+}

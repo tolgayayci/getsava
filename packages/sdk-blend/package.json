@@ -1,0 +1,18 @@
+{
+  "name": "@getsava/sdk-blend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Supply-only Blend v2 wrapper. Narrows RequestType to SupplyCollateral + WithdrawCollateral. Built in YK-468.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.7"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "getsava",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Sava — non-custodial Turkish savings app (TRY → USDC on Stellar + Blend v2 yield). Turborepo monorepo.",
+  "packageManager": "pnpm@10.30.2",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "i18n:check": "tsx packages/config/bin/check-i18n-parity.ts",
+    "terms:check": "tsx packages/config/bin/check-banned-terms.ts",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm i18n:check && pnpm terms:check && pnpm build",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@types/node": "^24.0.0",
+    "lefthook": "^2.1.9",
+    "tsx": "^4.22.4",
+    "turbo": "^2.9.16",
+    "typescript": "^6.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "esbuild",
+      "lefthook",
+      "sharp",
+      "unrs-resolver",
+      "workerd"
+    ]
+  }
+}

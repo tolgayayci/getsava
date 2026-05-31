@@ -1,0 +1,4 @@
+# Copy to apps/backend/.dev.vars (gitignored) for local `wrangler dev`.
+# Production/staging secrets are set with `wrangler secret put` (YK-487).
+# None are required for the GET /health scaffold.
+# DATABASE_URL=

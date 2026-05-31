@@ -1,16 +1,41 @@
-# Common
-.DS_Store
-*.log
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output / caches
+dist/
+build/
+.next/
+.nuxt/
+.turbo/
+.parcel-cache/
+.cache/
+coverage/
+*.tsbuildinfo
+
+# Expo / React Native
+.expo/
+apps/*/.expo/
+*.orig.*
+web-build/
+
+# Cloudflare Workers / Wrangler
+.wrangler/
+.dev.vars
+
+# Env
 .env
 .env.local
 .env.*.local
-node_modules/
-.next/
-.nuxt/
-dist/
-build/
-.turbo/
-.parcel-cache/
+
+# Editors / OS
+.DS_Store
+*.log
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Python (legacy/common)
 .venv/
 venv/
 __pycache__/
@@ -19,6 +44,7 @@ __pycache__/
 .mypy_cache/
 target/
 vendor/
-coverage/
 tmp/
-.cache/
+
+# Read-only reference MVP (kept on disk, never committed) — see README
+reference-mvp/

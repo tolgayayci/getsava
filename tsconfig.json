@@ -1,0 +1,6 @@
+{
+  "//": "Root config for editors. Each app/package has its own tsconfig that extends the shared base in packages/config. The workspace-wide typecheck runs via `turbo run typecheck`.",
+  "extends": "./packages/config/tsconfig.base.json",
+  "include": [],
+  "exclude": ["node_modules", "reference-mvp", "**/dist", "**/.expo"]
+}
