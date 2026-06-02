@@ -1,15 +1,21 @@
 import type { Hex, SignRawHashFn } from '@getsava/sdk-stellar';
+import {
+  useLoginWithEmail as privyUseLoginWithEmail,
+  useLoginWithOAuth as privyUseLoginWithOAuth,
+  usePrivy as privyUsePrivy,
+} from '@privy-io/expo';
+import {
+  useCreateWallet as privyUseCreateWallet,
+  useSignRawHash as privyUseSignRawHash,
+} from '@privy-io/expo/extended-chains';
 
 /**
- * Expo-Go-safe access to Privy's hooks.
+ * Typed re-exports of the Privy hooks we use.
  *
- * `@privy-io/expo` has native modules that throw on import in Expo Go. We
- * `require()` it once at module load and, if absent, substitute stub hooks. The
- * exported hook *references are constant for the app's lifetime*, so components
- * call them unconditionally and never violate the rules of hooks — whether Privy
- * is present (dev build) or not (Expo Go demo mode).
- *
- * Real auth/wallet only runs in a dev build with Privy configured (YK-455).
+ * `@privy-io/expo` ships native modules that ONLY exist in a dev build — it
+ * cannot run in Expo Go. We import it directly (no try/catch, no demo fallback):
+ * in Expo Go the bundle simply fails, which is the intended behaviour — there is
+ * no fake "logged-out" mode. Use a dev build (expo-dev-client) to run the app.
  */
 
 export interface PrivyUser {
@@ -47,58 +53,11 @@ export interface UseSignRawHashResult {
   readonly signRawHash: SignRawHashFn;
 }
 
-interface PrivyModule {
-  usePrivy: () => UsePrivyResult;
-  useLoginWithEmail: () => UseLoginWithEmailResult;
-  useLoginWithOAuth: () => UseLoginWithOAuthResult;
-}
+export const usePrivy = privyUsePrivy as unknown as () => UsePrivyResult;
+export const useLoginWithEmail = privyUseLoginWithEmail as unknown as () => UseLoginWithEmailResult;
+export const useLoginWithOAuth = privyUseLoginWithOAuth as unknown as () => UseLoginWithOAuthResult;
+export const useCreateWallet = privyUseCreateWallet as unknown as () => UseCreateWalletResult;
+export const useSignRawHash = privyUseSignRawHash as unknown as () => UseSignRawHashResult;
 
-interface PrivyExtendedChainsModule {
-  useCreateWallet: () => UseCreateWalletResult;
-  useSignRawHash: () => UseSignRawHashResult;
-}
-
-function loadPrivy(): { base: PrivyModule; ext: PrivyExtendedChainsModule } | null {
-  try {
-    const base = require('@privy-io/expo') as PrivyModule;
-    const ext = require('@privy-io/expo/extended-chains') as PrivyExtendedChainsModule;
-    return { base, ext };
-  } catch {
-    return null;
-  }
-}
-
-const privy = loadPrivy();
-
-export const isPrivyAvailable = privy !== null;
-
-const notAvailable = (): never => {
-  throw new Error('Privy is unavailable in this runtime (use a dev build, not Expo Go).');
-};
-
-// Stub hooks return shapes that match the real ones but no-op / report not-ready,
-// so demo-mode renders without crashing.
-const stubUsePrivy = (): UsePrivyResult => ({
-  isReady: false,
-  user: null,
-  logout: async () => {},
-});
-const stubUseLoginWithEmail = (): UseLoginWithEmailResult => ({
-  sendCode: notAvailable,
-  loginWithCode: notAvailable,
-});
-const stubUseLoginWithOAuth = (): UseLoginWithOAuthResult => ({ login: notAvailable });
-const stubUseCreateWallet = (): UseCreateWalletResult => ({ createWallet: notAvailable });
-const stubUseSignRawHash = (): UseSignRawHashResult => ({
-  signRawHash: async (): Promise<{ signature: Hex }> => notAvailable(),
-});
-
-export const usePrivy: () => UsePrivyResult = privy?.base.usePrivy ?? stubUsePrivy;
-export const useLoginWithEmail: () => UseLoginWithEmailResult =
-  privy?.base.useLoginWithEmail ?? stubUseLoginWithEmail;
-export const useLoginWithOAuth: () => UseLoginWithOAuthResult =
-  privy?.base.useLoginWithOAuth ?? stubUseLoginWithOAuth;
-export const useCreateWallet: () => UseCreateWalletResult =
-  privy?.ext.useCreateWallet ?? stubUseCreateWallet;
-export const useSignRawHash: () => UseSignRawHashResult =
-  privy?.ext.useSignRawHash ?? stubUseSignRawHash;
+// Re-export Hex so dependents have the signing type without reaching into sdk-stellar.
+export type { Hex };

@@ -1,35 +1,27 @@
+import { color } from '@getsava/ui';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import { PrivyStatus } from './src/components/PrivyStatus';
+import { View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { I18nProvider } from './src/i18n';
 import { PrivyAppProvider } from './src/providers/PrivyAppProvider';
+import { AuthFlow } from './src/screens/auth/AuthFlow';
+import { useAppFonts } from './src/ui';
 
 export function App() {
+  const fontsLoaded = useAppFonts();
+
   return (
-    <PrivyAppProvider>
-      <View style={styles.container}>
-        <Text style={styles.title}>Sava</Text>
-        <Text style={styles.subtitle}>Privy integration</Text>
-        <PrivyStatus />
-        <StatusBar style="auto" />
+    <SafeAreaProvider>
+      <View style={{ flex: 1, backgroundColor: color.bg }}>
+        {fontsLoaded ? (
+          <I18nProvider>
+            <PrivyAppProvider>
+              <AuthFlow />
+            </PrivyAppProvider>
+          </I18nProvider>
+        ) : null}
+        <StatusBar style="light" />
       </View>
-    </PrivyAppProvider>
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '600',
-  },
-  subtitle: {
-    marginTop: 8,
-    fontSize: 14,
-    opacity: 0.7,
-  },
-});

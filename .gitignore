@@ -18,6 +18,9 @@ coverage/
 apps/*/.expo/
 *.orig.*
 web-build/
+# Generated native projects (Expo prebuild / CNG)
+apps/*/ios/
+apps/*/android/
 
 # Cloudflare Workers / Wrangler
 .wrangler/
