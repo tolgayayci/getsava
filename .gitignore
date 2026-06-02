@@ -58,3 +58,6 @@ tmp/
 
 # Read-only reference MVP (kept on disk, never committed) — see README
 reference-mvp/
+
+# Scraped third-party docs (research notes, kept local only)
+.firecrawl/

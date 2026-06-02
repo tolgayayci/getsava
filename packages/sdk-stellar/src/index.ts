@@ -12,11 +12,21 @@ export {
   submitTransaction,
 } from './horizon';
 export {
+  type SendUsdcInput,
+  type SendUsdcResult,
+  sendUsdc,
+} from './payment';
+export {
   ensureUsdcTrustline,
   type ProvisioningState,
   type ProvisionOptions,
   type ProvisionResult,
 } from './provisioning';
+export {
+  findUsdcSettlement,
+  type SettlementMatch,
+  stellarExpertTxUrl,
+} from './settlement';
 export {
   attachSignature,
   type Hex,

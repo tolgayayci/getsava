@@ -1,0 +1,22 @@
+{
+  "name": "@getsava/sdk-mercuryo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Mercuryo on-ramp helpers — signed widget-URL builder, callback verification, order/quote types. Server-side signing; secret never reaches the client.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@getsava/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.7"
+  }
+}
