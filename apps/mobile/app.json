@@ -18,6 +18,12 @@
       "bundler": "metro",
       "output": "static"
     },
-    "plugins": ["expo-secure-store", "expo-web-browser", "expo-localization", "expo-font"]
+    "plugins": [
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-localization",
+      "expo-font",
+      "./plugins/withExpoSwift5.js"
+    ]
   }
 }
