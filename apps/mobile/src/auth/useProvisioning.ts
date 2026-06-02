@@ -31,7 +31,9 @@ export function useProvisioning(backend: BackendClient): UseProvisioningResult {
   const inFlight = useRef(false);
 
   const run = useCallback(async () => {
-    if (!user || inFlight.current) {
+    // Skip entirely if already provisioned (restored from persisted state) — a
+    // returning user must not see "Setting up your account" again.
+    if (!user || inFlight.current || useWalletStore.getState().isReady) {
       return;
     }
     inFlight.current = true;

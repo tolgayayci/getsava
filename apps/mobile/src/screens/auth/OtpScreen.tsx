@@ -1,10 +1,10 @@
 import { color, radius, space, type } from '@getsava/ui';
 import { useEffect, useRef, useState } from 'react';
 import {
-  Animated,
   type EmitterSubscription,
   Keyboard,
   type KeyboardEvent,
+  LayoutAnimation,
   Platform,
   Pressable,
   StyleSheet,
@@ -42,43 +42,41 @@ export function OtpScreen({
   const [code, setCode] = useState('');
   const [resendIn, setResendIn] = useState(RESEND_SECONDS);
   const [resent, setResent] = useState(false);
+  const [kbHeight, setKbHeight] = useState(0);
   const inputRef = useRef<TextInput>(null);
-  const shift = useRef(new Animated.Value(0)).current;
 
   const otpError = auth.error !== null;
   const verifying = auth.step === 'verifying';
 
-  // Shift the centered content up by half the keyboard height, matching the
-  // keyboard's animation duration so it moves perfectly in sync (no lag).
+  // Reserve space equal to the keyboard height as bottom padding and let the
+  // layout shift ride the keyboard's OWN animation curve via LayoutAnimation.
+  // This stays on the native timeline (no JS-driven Animated.timing fighting it),
+  // so opening and closing are instant and smooth on both directions.
   useEffect(() => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
-    const onShow = (e: KeyboardEvent) => {
-      Animated.timing(shift, {
-        toValue: -e.endCoordinates.height / 2,
+    const animateTo = (height: number, e: KeyboardEvent) => {
+      LayoutAnimation.configureNext({
         duration: e.duration || 250,
-        useNativeDriver: true,
-      }).start();
-    };
-    const onHide = (e: KeyboardEvent) => {
-      Animated.timing(shift, {
-        toValue: 0,
-        duration: e.duration || 250,
-        useNativeDriver: true,
-      }).start();
+        update: {
+          type: LayoutAnimation.Types.keyboard,
+          property: LayoutAnimation.Properties.opacity,
+        },
+      });
+      setKbHeight(height);
     };
 
     const subs: EmitterSubscription[] = [
-      Keyboard.addListener(showEvent, onShow),
-      Keyboard.addListener(hideEvent, onHide),
+      Keyboard.addListener(showEvent, (e) => animateTo(e.endCoordinates.height, e)),
+      Keyboard.addListener(hideEvent, (e) => animateTo(0, e)),
     ];
     return () => {
       for (const s of subs) {
         s.remove();
       }
     };
-  }, [shift]);
+  }, []);
 
   // Open the keyboard on mount.
   useEffect(() => {
@@ -133,7 +131,7 @@ export function OtpScreen({
         </Text>
       </View>
 
-      <Animated.View style={[styles.flex, { transform: [{ translateY: shift }] }]}>
+      <View style={[styles.flex, { paddingBottom: kbHeight }]}>
         <Pressable style={styles.body} onPress={() => inputRef.current?.focus()}>
           <View style={styles.iconBubble}>
             <Icon name="locksmall" size={30} stroke={color.purple} />
@@ -198,7 +196,7 @@ export function OtpScreen({
             )}
           </View>
         </Pressable>
-      </Animated.View>
+      </View>
     </View>
   );
 }
