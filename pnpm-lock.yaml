@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  expo-modules-core:
+    hash: 21d154842ee587ab1d9a21ebcf5dfec54cc33781610b2f4123d2c3b298ba0d22
+    path: patches/expo-modules-core.patch
   expo-modules-jsi@56.0.7:
     hash: cb8cff36d6da537aec2cd5521539607486f69de9475fcc2731db7a0cc8de9cc6
     path: patches/expo-modules-jsi@56.0.7.patch
@@ -6153,7 +6156,7 @@ snapshots:
       - supports-color
       - typescript
 
-  expo-modules-core@56.0.14(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))(react@19.2.6):
+  expo-modules-core@56.0.14(patch_hash=21d154842ee587ab1d9a21ebcf5dfec54cc33781610b2f4123d2c3b298ba0d22)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))(react@19.2.6):
     dependencies:
       '@expo/expo-modules-macros-plugin': 0.0.9
       expo-modules-jsi: 56.0.7(patch_hash=cb8cff36d6da537aec2cd5521539607486f69de9475fcc2731db7a0cc8de9cc6)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))
@@ -6206,7 +6209,7 @@ snapshots:
       expo-font: 56.0.5(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))(react@19.2.6)
       expo-keep-awake: 56.0.3(expo@56.0.8)(react@19.2.6)
       expo-modules-autolinking: 56.0.14(typescript@6.0.3)
-      expo-modules-core: 56.0.14(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))(react@19.2.6)
+      expo-modules-core: 56.0.14(patch_hash=21d154842ee587ab1d9a21ebcf5dfec54cc33781610b2f4123d2c3b298ba0d22)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6))(react@19.2.6)
       pretty-format: 29.7.0
       react: 19.2.6
       react-native: 0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.6)
