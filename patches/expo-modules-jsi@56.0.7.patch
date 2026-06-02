@@ -1,3 +1,16 @@
+diff --git a/apple/Package.swift b/apple/Package.swift
+index 3eae728dd9962df808d9676f5f6171b53ea1a7fe..f6b9b4075761cbb31eda885ae6f5544754a8a958 100644
+--- a/apple/Package.swift
++++ b/apple/Package.swift
+@@ -134,7 +134,7 @@ let package = Package(
+       dependencies: testFrameworks.dependencies,
+     ),
+   ] + testFrameworks.binaryTargets,
+-  swiftLanguageModes: [.v6],
++  swiftLanguageModes: [.v5],
+   cxxLanguageStandard: .cxx20
+ )
+ 
 diff --git a/apple/Sources/ExpoModulesJSI/Contexts/HostFunctionContext.swift b/apple/Sources/ExpoModulesJSI/Contexts/HostFunctionContext.swift
 index bc89b9cf91825b4bd98f59bcaaf90bd4d4284257..e693d24f0d628af5a044e6d773d9776ce1160d6c 100644
 --- a/apple/Sources/ExpoModulesJSI/Contexts/HostFunctionContext.swift
