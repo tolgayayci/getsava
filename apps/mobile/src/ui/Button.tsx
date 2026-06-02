@@ -1,4 +1,4 @@
-import { color, radius, type } from '@getsava/ui';
+import { color, type } from '@getsava/ui';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 

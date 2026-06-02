@@ -83,6 +83,14 @@ export function LoginScreen({
               <Text style={styles.errorText}>{t('auth.netError')}</Text>
             </View>
           )}
+          {auth.error !== null &&
+            auth.error !== 'auth.netError' &&
+            auth.error !== 'auth.emailError' && (
+              <View style={styles.errorRow}>
+                <Icon name="alert" size={13} stroke={color.red} />
+                <Text style={styles.errorText}>{auth.error}</Text>
+              </View>
+            )}
         </View>
 
         <View style={{ marginTop: space.s4 }}>

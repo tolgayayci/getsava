@@ -1,5 +1,5 @@
 import type { ProvisioningState } from '@getsava/sdk-stellar';
-import { color, radius, space, type } from '@getsava/ui';
+import { color, space, type } from '@getsava/ui';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';

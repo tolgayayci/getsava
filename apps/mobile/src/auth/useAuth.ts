@@ -47,6 +47,7 @@ export function useAuth(): UseAuthResult {
         setStep('awaiting-code');
         return true;
       } catch (err) {
+        console.warn('[Sava] Privy sendCode failed:', err);
         setError(toMessage(err));
         setStep('idle');
         return false;
