@@ -35,6 +35,9 @@
       "sharp",
       "unrs-resolver",
       "workerd"
-    ]
+    ],
+    "patchedDependencies": {
+      "expo-modules-jsi@56.0.7": "patches/expo-modules-jsi@56.0.7.patch"
+    }
   }
 }
