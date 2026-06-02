@@ -12,6 +12,7 @@ export {
   submitTransaction,
 } from './horizon';
 export {
+  buildUsdcPaymentXdr,
   type SendUsdcInput,
   type SendUsdcResult,
   sendUsdc,

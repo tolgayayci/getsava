@@ -66,3 +66,37 @@ export async function sendUsdc(input: SendUsdcInput): Promise<SendUsdcResult> {
 function memoText(text: string): Memo {
   return Memo.text(text.slice(0, 28));
 }
+
+/**
+ * Build the UNSIGNED USDC payment transaction for a user-controlled wallet (the
+ * Send/Withdraw flow). The client hashes this, signs it via Privy raw-hash, and
+ * submits — the secret never exists. `sequence` is the source account's CURRENT
+ * sequence from Horizon (the builder increments it). Returns base64 XDR.
+ */
+export function buildUsdcPaymentXdr(
+  network: Network,
+  source: string,
+  sequence: string,
+  destination: string,
+  amount: string,
+  options: { memo?: string; fee?: string; timeoutSeconds?: number } = {},
+): string {
+  const cfg = networkConfig(network);
+  const account = new Account(source, sequence);
+  const asset = new Asset(cfg.usdc.code, cfg.usdc.issuer);
+
+  const builder = new TransactionBuilder(account, {
+    fee: options.fee ?? DEFAULT_FEE,
+    networkPassphrase: cfg.networkPassphrase,
+  }).addOperation(Operation.payment({ destination, asset, amount }));
+
+  if (options.memo !== undefined && options.memo.length > 0) {
+    builder.addMemo(memoText(options.memo));
+  }
+
+  return builder
+    .setTimeout(options.timeoutSeconds ?? DEFAULT_TIMEOUT_SECONDS)
+    .build()
+    .toEnvelope()
+    .toXDR('base64');
+}

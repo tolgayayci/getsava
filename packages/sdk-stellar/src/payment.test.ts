@@ -1,6 +1,6 @@
 import { Keypair, Networks, Transaction } from '@stellar/stellar-base';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { sendUsdc } from './payment';
+import { buildUsdcPaymentXdr, sendUsdc } from './payment';
 
 const TREASURY = Keypair.fromSecret(
   // Throwaway fixed testnet secret — used only to make the test deterministic.
@@ -72,5 +72,31 @@ describe('sendUsdc', () => {
         amount: '500',
       }),
     ).rejects.toThrow(/not found/);
+  });
+});
+
+describe('buildUsdcPaymentXdr', () => {
+  const SOURCE = TREASURY.publicKey();
+
+  it('builds an unsigned USDC payment with the right op, memo, and no signatures', () => {
+    const xdr = buildUsdcPaymentXdr('testnet', SOURCE, '100', DEST, '12.5000000', {
+      memo: 'sava-send',
+    });
+    const tx = new Transaction(xdr, Networks.TESTNET);
+    // biome-ignore lint/suspicious/noExplicitAny: parsed operation is loosely typed
+    const op = tx.operations[0] as any;
+    expect(op.type).toBe('payment');
+    expect(op.destination).toBe(DEST);
+    expect(op.amount).toBe('12.5000000');
+    expect(op.asset.code).toBe('USDC');
+    expect(op.asset.issuer).toBe(ISSUER);
+    expect(tx.memo.value?.toString()).toBe('sava-send');
+    expect(tx.signatures.length).toBe(0); // unsigned — Privy signs client-side
+  });
+
+  it('omits the memo when none is given', () => {
+    const xdr = buildUsdcPaymentXdr('testnet', SOURCE, '100', DEST, '1.0000000');
+    const tx = new Transaction(xdr, Networks.TESTNET);
+    expect(tx.memo.type).toBe('none');
   });
 });

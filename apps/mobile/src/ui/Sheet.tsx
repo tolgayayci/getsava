@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface SheetProps {
   visible: boolean;
-  onClose?: () => void;
+  onClose?: (() => void) | undefined;
   title?: string;
   children?: ReactNode;
   /** Sticky bottom action area (buttons). */

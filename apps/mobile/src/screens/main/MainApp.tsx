@@ -10,6 +10,8 @@ import { HomeScreen } from './HomeScreen';
 import { MercuryoScreen } from './MercuryoScreen';
 import { OrderDetailScreen } from './OrderDetailScreen';
 import { Placeholder } from './Placeholder';
+import { ReceiveScreen } from './ReceiveScreen';
+import { SendScreen } from './SendScreen';
 import { SettingsScreen } from './SettingsScreen';
 
 /** Title shown by the placeholder for a not-yet-built pushed route. */
@@ -36,7 +38,13 @@ function ActiveScreen({ nav }: { nav: Nav }) {
     if (top.route === 'order') {
       return <OrderDetailScreen />;
     }
-    // receive/send land in task 5; activity is designed later → placeholder.
+    if (top.route === 'receive') {
+      return <ReceiveScreen />;
+    }
+    if (top.route === 'send') {
+      return <SendScreen />;
+    }
+    // activity is designed later → placeholder.
     return (
       <Placeholder title={t(STACK_TITLE[top.route] as Parameters<typeof t>[0])} onBack={nav.back} />
     );
