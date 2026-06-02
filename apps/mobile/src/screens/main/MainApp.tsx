@@ -5,7 +5,10 @@ import { useTranslation } from '../../i18n';
 import { type Nav, NavProvider, type StackRoute, useNav } from '../../nav';
 import { TabBar } from '../../ui';
 import { AddFundsSheet } from './AddFundsSheet';
+import { AddLiraScreen } from './AddLiraScreen';
 import { HomeScreen } from './HomeScreen';
+import { MercuryoScreen } from './MercuryoScreen';
+import { OrderDetailScreen } from './OrderDetailScreen';
 import { Placeholder } from './Placeholder';
 import { SettingsScreen } from './SettingsScreen';
 
@@ -24,7 +27,16 @@ function ActiveScreen({ nav }: { nav: Nav }) {
   const top = nav.stackTop;
 
   if (top) {
-    // Real pushed screens land here in later tasks; placeholders until then.
+    if (top.route === 'addLira') {
+      return <AddLiraScreen />;
+    }
+    if (top.route === 'mercuryo') {
+      return <MercuryoScreen />;
+    }
+    if (top.route === 'order') {
+      return <OrderDetailScreen />;
+    }
+    // receive/send land in task 5; activity is designed later → placeholder.
     return (
       <Placeholder title={t(STACK_TITLE[top.route] as Parameters<typeof t>[0])} onBack={nav.back} />
     );
