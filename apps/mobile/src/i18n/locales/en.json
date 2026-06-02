@@ -13,7 +13,9 @@
     "seeAll": "See all",
     "details": "Details",
     "max": "Max",
-    "variable": "Variable"
+    "variable": "Variable",
+    "comingSoon": "Coming soon",
+    "comingSoonBody": "This screen is on the way."
   },
   "language": {
     "label": "Language",

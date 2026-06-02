@@ -6,12 +6,11 @@ import {
   useOnboardingAck,
   usePrivy,
   useProvisioning,
-  useSession,
   useWalletHydrated,
   useWalletStore,
 } from '../../auth';
 import { stubBackendClient } from '../../backend/client';
-import { HomePlaceholder } from '../HomePlaceholder';
+import { MainApp } from '../main/MainApp';
 import { LoginScreen } from './LoginScreen';
 import { OnboardingGate } from './OnboardingGate';
 import { OtpScreen } from './OtpScreen';
@@ -33,7 +32,6 @@ export function AuthFlow() {
   const [email, setEmail] = useState('');
 
   const auth = useAuth();
-  const session = useSession();
   const { user, isReady: privyReady } = usePrivy();
   const { acknowledged, acknowledge } = useOnboardingAck();
   const walletHydrated = useWalletHydrated();
@@ -55,7 +53,7 @@ export function AuthFlow() {
     if (!isReady) {
       return <ProvisioningScreen state={provisioning} onRetry={retry} />;
     }
-    return <HomePlaceholder onSignOut={session.signOut} />;
+    return <MainApp />;
   }
 
   // Not logged in: show onboarding first (once), then sign-in.

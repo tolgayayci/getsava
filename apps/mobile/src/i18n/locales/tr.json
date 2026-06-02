@@ -13,7 +13,9 @@
     "seeAll": "Tümü",
     "details": "Ayrıntılar",
     "max": "Tümü",
-    "variable": "Değişken"
+    "variable": "Değişken",
+    "comingSoon": "Yakında",
+    "comingSoonBody": "Bu ekran çok yakında geliyor."
   },
   "language": {
     "label": "Dil",
