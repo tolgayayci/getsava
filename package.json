@@ -37,7 +37,8 @@
       "workerd"
     ],
     "patchedDependencies": {
-      "expo-modules-jsi@56.0.7": "patches/expo-modules-jsi@56.0.7.patch"
+      "expo-modules-jsi@56.0.7": "patches/expo-modules-jsi@56.0.7.patch",
+      "expo-modules-core": "patches/expo-modules-core.patch"
     }
   }
 }
