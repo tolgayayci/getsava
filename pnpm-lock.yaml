@@ -85,7 +85,7 @@ importers:
         version: link:../../packages/ui
       '@privy-io/expo':
         specifier: ^0.67.1
-        version: 0.67.1(75cb2e63f91233700498e0190c4ebd33)
+        version: 0.67.1(4fcb382dd3a10a20a90c56b3b5755b58)
       '@privy-io/expo-native-extensions':
         specifier: ^0.0.11
         version: 0.0.11(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))(react@19.2.3)
@@ -104,6 +104,9 @@ importers:
       expo-application:
         specifier: ~56.0.3
         version: 56.0.3(expo@56.0.8)
+      expo-clipboard:
+        specifier: ~56.0.3
+        version: 56.0.3(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))(react@19.2.3)
       expo-constants:
         specifier: ~56.0.16
         version: 56.0.16(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))
@@ -2331,6 +2334,13 @@ packages:
 
   expo-asset@56.0.15:
     resolution: {integrity: sha512-BHGi2IAOPQTcOelkUdcz1WIknfCTRjkcpYHX1azjMwgYenrVC+J5qcqJGaC8eUOWLCRtkRJWGnmFQRYtLU1nUQ==}
+    peerDependencies:
+      expo: '*'
+      react: '*'
+      react-native: '*'
+
+  expo-clipboard@56.0.3:
+    resolution: {integrity: sha512-8mCdhmAomm0yBIonJFjAhKUXvSkc2avdNh4+rBwoe7DSWF2AC4w3uy+pa419rvVFbTyVxOBmh83UHAbUwD6qAg==}
     peerDependencies:
       expo: '*'
       react: '*'
@@ -5198,7 +5208,7 @@ snapshots:
       react: 19.2.3
       react-native: 0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3)
 
-  '@privy-io/expo@0.67.1(75cb2e63f91233700498e0190c4ebd33)':
+  '@privy-io/expo@0.67.1(4fcb382dd3a10a20a90c56b3b5755b58)':
     dependencies:
       '@privy-io/api-types': 0.14.0
       '@privy-io/expo-native-extensions': 0.0.11(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))(react@19.2.3)
@@ -5216,6 +5226,7 @@ snapshots:
       zustand: 5.0.14(@types/react@19.2.15)(react@19.2.3)
     optionalDependencies:
       expo-apple-authentication: 56.0.4(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))(react@19.2.3)
+      expo-clipboard: 56.0.3(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))(react@19.2.3)
       expo-linking: 56.0.13(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))(react@19.2.3)
       expo-secure-store: 56.0.4(expo@56.0.8)
       expo-web-browser: 56.0.5(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))
@@ -6084,6 +6095,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
+
+  expo-clipboard@56.0.3(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))(react@19.2.3):
+    dependencies:
+      expo: 56.0.8(@babel/core@7.29.7)(@expo/dom-webview@56.0.5)(react-native-webview@13.16.1(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
+      react: 19.2.3
+      react-native: 0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3)
 
   expo-constants@56.0.16(expo@56.0.8)(react-native@0.85.3(@babel/core@7.29.7)(@types/react@19.2.15)(react@19.2.3)):
     dependencies:

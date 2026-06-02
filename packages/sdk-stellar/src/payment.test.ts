@@ -17,7 +17,7 @@ afterEach(() => {
 function mockHorizon(captured: { body?: string }) {
   vi.stubGlobal(
     'fetch',
-    vi.fn(async (url: string, init?: { body?: string }) => {
+    vi.fn(async (_url: string, init?: { body?: string }) => {
       if (init?.body) {
         captured.body = init.body;
         return { ok: true, json: async () => ({ hash: 'submitted_hash' }) };
