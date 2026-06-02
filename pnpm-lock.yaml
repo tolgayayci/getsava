@@ -37,6 +37,15 @@ importers:
 
   apps/backend:
     dependencies:
+      '@getsava/sdk-mercuryo':
+        specifier: workspace:*
+        version: link:../../packages/sdk-mercuryo
+      '@getsava/sdk-stellar':
+        specifier: workspace:*
+        version: link:../../packages/sdk-stellar
+      '@getsava/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       hono:
         specifier: ^4.12.23
         version: 4.12.23

@@ -1,23 +1,35 @@
 import { describe, expect, it } from 'vitest';
-import { callbackMerchantTxId, canTransition, isTerminal, orderStateFromCallback } from './order';
+import {
+  callbackEventKey,
+  callbackMerchantTxId,
+  canTransition,
+  isTerminal,
+  orderStateFromCallback,
+} from './order';
 
 describe('order state machine', () => {
-  it('allows the happy path pending→paid→settling→settled', () => {
-    expect(canTransition('pending', 'paid')).toBe(true);
-    expect(canTransition('paid', 'settling')).toBe(true);
-    expect(canTransition('settling', 'settled')).toBe(true);
+  it('allows the happy path pending→widget_opened→paid→settled', () => {
+    expect(canTransition('pending', 'widget_opened')).toBe(true);
+    expect(canTransition('widget_opened', 'paid')).toBe(true);
+    expect(canTransition('paid', 'settled')).toBe(true);
+  });
+
+  it('allows chain-first settlement (USDC before the paid callback)', () => {
+    expect(canTransition('pending', 'settled')).toBe(true);
+    expect(canTransition('widget_opened', 'settled')).toBe(true);
   });
 
   it('rejects illegal transitions', () => {
-    expect(canTransition('pending', 'settled')).toBe(false);
     expect(canTransition('settled', 'paid')).toBe(false);
     expect(canTransition('failed', 'settled')).toBe(false);
+    expect(canTransition('paid', 'widget_opened')).toBe(false);
   });
 
   it('marks terminal states', () => {
     expect(isTerminal('settled')).toBe(true);
     expect(isTerminal('failed')).toBe(true);
     expect(isTerminal('pending')).toBe(false);
+    expect(isTerminal('widget_opened')).toBe(false);
   });
 });
 
@@ -41,5 +53,17 @@ describe('callbackMerchantTxId', () => {
     expect(callbackMerchantTxId({ merchant_transaction_id: 'a' })).toBe('a');
     expect(callbackMerchantTxId({ merchantTransactionId: 'b' })).toBe('b');
     expect(callbackMerchantTxId({})).toBeNull();
+  });
+});
+
+describe('callbackEventKey', () => {
+  it('combines id and event type for idempotency', () => {
+    expect(callbackEventKey({ merchant_transaction_id: 'a', type: 'completed' })).toBe(
+      'a:completed',
+    );
+    expect(callbackEventKey({ merchant_transaction_id: 'a', status: 'PAID' })).toBe('a:paid');
+  });
+  it('returns null without a merchant_transaction_id', () => {
+    expect(callbackEventKey({ type: 'completed' })).toBeNull();
   });
 });

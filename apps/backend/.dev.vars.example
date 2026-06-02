@@ -6,4 +6,15 @@
 # PRIVY_APP_ID=
 # PRIVY_APP_SECRET=
 #
+# Mercuryo on-ramp (YK-461 delivers the sandbox widget id + keys; never client):
+# MERCURYO_WIDGET_ID=
+# MERCURYO_WIDGET_SECRET=     (signs widget URLs — SHA512 recipe)
+# MERCURYO_SIGN_KEY=          (verifies callback HMAC-SHA256)
+#
+# Testnet treasury bridge (TESTNET ONLY — delivers USDC the sandbox can't settle;
+# disabled on mainnet where Mercuryo settles USDC-on-Stellar directly):
+# BRIDGE_ENABLED=true
+# TREASURY_SECRET=            (S... funded testnet account; server-side only)
+# TRY_PER_USD=40              (static MVP quote rate)
+#
 # DATABASE_URL=   (Neon via Hyperdrive — YK-487)

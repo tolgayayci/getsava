@@ -6,6 +6,7 @@ export {
   widgetCurrency,
 } from './config';
 export {
+  callbackEventKey,
   callbackMerchantTxId,
   canTransition,
   isTerminal,

@@ -12,6 +12,9 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@getsava/sdk-mercuryo": "workspace:*",
+    "@getsava/sdk-stellar": "workspace:*",
+    "@getsava/types": "workspace:*",
     "hono": "^4.12.23"
   },
   "devDependencies": {

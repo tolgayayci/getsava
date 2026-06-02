@@ -1,20 +1,23 @@
 /**
  * Order state machine for a lira deposit (T1.D2). Mirrors Mercuryo's lifecycle
- * plus our own Stellar-settlement step:
+ * plus our own Stellar-settlement step (documented in docs/order-states.md):
  *
- *   pending  → user got a signed widget URL, hasn't paid
- *   paid     → Mercuryo callback says the fiat payment completed
- *   settling → USDC delivery to the user's Stellar wallet in progress
- *   settled  → USDC confirmed on Horizon for the user's address (terminal)
- *   failed   → payment failed/cancelled or settlement gave up (terminal)
+ *   pending       → a signed widget URL was issued; user hasn't paid
+ *   widget_opened → user opened the Mercuryo widget (client-reported)
+ *   paid          → Mercuryo callback says the fiat payment completed
+ *   settled       → incoming USDC confirmed on Horizon for the user (terminal)
+ *   failed        → payment failed/cancelled, or settlement gave up (terminal)
+ *
+ * Settlement is chain-first: Horizon is ground truth, so USDC can arrive before
+ * the `paid` callback — pending/widget_opened may jump straight to `settled`.
  */
-export type OrderState = 'pending' | 'paid' | 'settling' | 'settled' | 'failed';
+export type OrderState = 'pending' | 'widget_opened' | 'paid' | 'settled' | 'failed';
 
 /** Allowed transitions; anything else is rejected (no silent regressions). */
 const TRANSITIONS: Record<OrderState, readonly OrderState[]> = {
-  pending: ['paid', 'failed'],
-  paid: ['settling', 'failed'],
-  settling: ['settled', 'failed'],
+  pending: ['widget_opened', 'paid', 'settled', 'failed'],
+  widget_opened: ['paid', 'settled', 'failed'],
+  paid: ['settled', 'failed'],
   settled: [],
   failed: [],
 };
@@ -55,4 +58,14 @@ export interface MercuryoCallback {
 /** Pull the merchant_transaction_id from a callback (handles both casings). */
 export function callbackMerchantTxId(cb: MercuryoCallback): string | null {
   return cb.merchant_transaction_id ?? cb.merchantTransactionId ?? null;
+}
+
+/** Stable idempotency key for a callback: (merchant_transaction_id, event_type). */
+export function callbackEventKey(cb: MercuryoCallback): string | null {
+  const id = callbackMerchantTxId(cb);
+  if (id === null) {
+    return null;
+  }
+  const event = (cb.type ?? cb.status ?? 'unknown').toLowerCase();
+  return `${id}:${event}`;
 }
