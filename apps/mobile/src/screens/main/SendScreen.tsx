@@ -18,7 +18,7 @@ import { usdcToTry } from '../../lib/fx';
 import { NETWORK } from '../../lib/network';
 import { useBalances } from '../../lib/useBalances';
 import { useNav } from '../../nav';
-import { Button, CopyRow, Icon, Keypad, type KeypadKey, NavHeader, Notice, Sheet } from '../../ui';
+import { Button, CopyRow, Icon, Keypad, type KeypadKey, NavHeader, Sheet } from '../../ui';
 
 const ADDR_RE = /^G[A-Z2-7]{55}$/;
 
@@ -185,12 +185,6 @@ export function SendScreen() {
           </>
         ) : null}
       </Sheet>
-
-      {!validAddr && addr.length > 0 ? (
-        <View style={[styles.invalidWrap, { bottom: insets.bottom + 80 }]} pointerEvents="none">
-          <Notice tone="red" icon="alert" title={t('send.recipient')} body={t('send.invalid')} />
-        </View>
-      ) : null}
     </>
   );
 }
@@ -298,5 +292,4 @@ const styles = StyleSheet.create({
     marginTop: space.s2,
     maxWidth: 280,
   },
-  invalidWrap: { position: 'absolute', left: space.gutter, right: space.gutter },
 });
