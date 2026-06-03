@@ -1,6 +1,6 @@
 import { color, font, space, type } from '@getsava/ui';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { stubBackendClient } from '../../backend/client';
 import { formatLira, formatUsdc, useTranslation } from '../../i18n';
@@ -11,6 +11,9 @@ import { Button, Icon, Keypad, type KeypadKey, NavHeader, Notice } from '../../u
 const MIN_TRY = 100;
 const MAX_TRY = 200000;
 const KYC_TRY = 25164; // ≈ €699
+const QUICKS = [500, 1000, 2500, 5000];
+
+const groupTry = (n: number) => new Intl.NumberFormat('de-DE').format(n);
 
 export function AddLiraScreen() {
   const { t, locale } = useTranslation();
@@ -25,7 +28,7 @@ export function AddLiraScreen() {
   const kyc = val >= KYC_TRY && val <= MAX_TRY;
   const valid = val >= MIN_TRY && val <= MAX_TRY;
   const symPre = locale !== 'tr';
-  const display = val === 0 ? '0' : new Intl.NumberFormat('de-DE').format(val);
+  const display = val === 0 ? '0' : groupTry(val);
 
   const press = (k: KeypadKey) => {
     if (k === 'del') {
@@ -69,15 +72,35 @@ export function AddLiraScreen() {
             {t('addLira.receive')}{' '}
             <Text style={styles.receiveMono}>≈ {formatUsdc(recv, locale)}</Text>
           </Text>
+
+          <View style={styles.quick}>
+            {QUICKS.map((q) => (
+              <Pressable
+                key={q}
+                style={styles.chip}
+                onPress={() => setVal(q)}
+                accessibilityRole="button"
+              >
+                <Text style={styles.chipText}>₺{groupTry(q)}</Text>
+              </Pressable>
+            ))}
+          </View>
+
           {below ? (
-            <Text style={styles.err}>
-              {t('addLira.below')} · {formatLira(MIN_TRY, locale)}
-            </Text>
+            <View style={styles.errRow}>
+              <Icon name="alert" size={13} stroke={color.red} />
+              <Text style={styles.errText}>
+                {t('addLira.below')} · {formatLira(MIN_TRY, locale)}
+              </Text>
+            </View>
           ) : null}
           {above ? (
-            <Text style={styles.err}>
-              {t('addLira.above')} · {formatLira(MAX_TRY, locale)}
-            </Text>
+            <View style={styles.errRow}>
+              <Icon name="alert" size={13} stroke={color.red} />
+              <Text style={styles.errText}>
+                {t('addLira.above')} · {formatLira(MAX_TRY, locale)}
+              </Text>
+            </View>
           ) : null}
           {kyc ? (
             <View style={styles.kyc}>
@@ -126,23 +149,47 @@ const styles = StyleSheet.create({
   valPh: { color: color.inkFaint },
   receive: { ...type.body, color: color.inkDim, marginTop: space.s4 },
   receiveMono: { fontFamily: font.mono, color: color.ink },
-  err: {
+  quick: {
     flexDirection: 'row',
-    ...type.caption,
-    color: color.red,
-    marginTop: space.s3,
-    textAlign: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: space.s5,
   },
-  kyc: { marginTop: space.s4, alignSelf: 'stretch' },
+  chip: {
+    backgroundColor: color.surface,
+    borderWidth: 1,
+    borderColor: color.hair,
+    borderRadius: 999,
+    paddingHorizontal: 15,
+    paddingVertical: 9,
+  },
+  chipText: { fontFamily: font.mono, fontSize: 13, color: color.ink },
+  errRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    marginTop: space.s4,
+  },
+  errText: { ...type.caption, color: color.red },
+  kyc: { marginTop: space.s5, alignSelf: 'stretch' },
   note: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 7,
     marginBottom: space.s4,
-    paddingHorizontal: space.s4,
+    maxWidth: 320,
+    alignSelf: 'center',
   },
-  noteText: { ...type.micro, color: color.inkFaint, flexShrink: 1, textAlign: 'center' },
+  noteText: {
+    ...type.micro,
+    color: color.inkFaint,
+    lineHeight: 16,
+    textAlign: 'center',
+    flexShrink: 1,
+  },
   dock: {
     paddingHorizontal: space.gutter,
     paddingTop: space.s3,
