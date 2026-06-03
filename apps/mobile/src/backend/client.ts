@@ -57,6 +57,10 @@ export interface BackendClient {
   markWidgetOpened: (orderId: string) => Promise<void>;
   /** DEMO: stand in for Mercuryo's paid webhook (YK-463). Removed at D6. */
   simulatePayment: (orderId: string) => Promise<void>;
+  /** Mark an order settled with the real Stellar tx hash (testnet deposit bridge). */
+  settleOrder: (orderId: string, stellarTxHash: string) => Promise<void>;
+  /** Mark an order failed (payment or settlement error). */
+  failOrder: (orderId: string) => Promise<void>;
   /** Poll an order's current state (YK-466 settlement detection on D6). */
   getOrder: (orderId: string) => Promise<OrderStatus | null>;
 }
@@ -122,6 +126,21 @@ export const stubBackendClient: BackendClient = {
     if (o && (o.state === 'pending' || o.state === 'widget_opened')) {
       o.state = 'paid';
       o.paidAt = Date.now();
+    }
+  },
+
+  settleOrder: async (orderId, stellarTxHash) => {
+    const o = orders.get(orderId);
+    if (o) {
+      o.state = 'settled';
+      o.stellarTxHash = stellarTxHash;
+    }
+  },
+
+  failOrder: async (orderId) => {
+    const o = orders.get(orderId);
+    if (o) {
+      o.state = 'failed';
     }
   },
 

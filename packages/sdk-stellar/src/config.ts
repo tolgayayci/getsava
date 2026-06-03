@@ -28,8 +28,10 @@ export const NETWORKS: Record<Network, NetworkConfig> = {
     rpcUrl: 'https://soroban-testnet.stellar.org',
     networkPassphrase: TESTNET_PASSPHRASE,
     friendbotUrl: 'https://friendbot.stellar.org',
-    // Proven testnet USDC issuer (verified end-to-end in reference-mvp).
-    usdc: { code: 'USDC', issuer: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5' },
+    // Sava-controlled testnet USDC issuer — mints USDC to users for the D2
+    // deposit bridge (stands in for Mercuryo settlement until the sandbox is
+    // live). Mainnet uses Circle USDC and the bridge is removed.
+    usdc: { code: 'USDC', issuer: 'GBHJKBFM3O3F4Z5EOLWMGWDTDTTSTU5KRREB6SZHANMYFYMMRLIGIGWK' },
   },
   mainnet: {
     network: 'mainnet',

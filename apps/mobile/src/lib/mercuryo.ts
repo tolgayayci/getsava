@@ -21,6 +21,15 @@ const TEST_WIDGET_ID = '625376b4-cf28-43b8-b836-550cd558c431';
 
 export const MERCURYO_WIDGET_ID = process.env.EXPO_PUBLIC_MERCURYO_WIDGET_ID ?? TEST_WIDGET_ID;
 
+/**
+ * True only when a real partner widget_id is set in env. Until then the deposit
+ * uses the mock card screen (the test id can't render: sandbox needs IP
+ * allow-listing, and it's invalid on production).
+ */
+export function mercuryoConfigured(): boolean {
+  return Boolean(process.env.EXPO_PUBLIC_MERCURYO_WIDGET_ID);
+}
+
 const MERCURYO_HOST =
   process.env.EXPO_PUBLIC_MERCURYO_HOST === 'production'
     ? 'https://exchange.mercuryo.io'

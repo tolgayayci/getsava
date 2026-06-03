@@ -9,7 +9,7 @@ import {
   submitTransaction,
 } from './horizon';
 
-const USDC_ISSUER = 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5';
+const USDC_ISSUER = 'GBHJKBFM3O3F4Z5EOLWMGWDTDTTSTU5KRREB6SZHANMYFYMMRLIGIGWK';
 
 function jsonResponse(status: number, body: unknown): Response {
   return {
