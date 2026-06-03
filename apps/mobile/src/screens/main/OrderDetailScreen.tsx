@@ -105,6 +105,9 @@ export function OrderDetailScreen() {
             {phase === 'failed' ? <Icon name="x" size={34} stroke={color.red} /> : null}
           </View>
           <Text style={styles.statusTitle}>{hero.title}</Text>
+          {settled ? (
+            <Text style={styles.received}>+{formatUsdc(expectedUsdc, locale)}</Text>
+          ) : null}
           <Text style={styles.statusBody}>{hero.body}</Text>
         </View>
 
@@ -242,6 +245,13 @@ const styles = StyleSheet.create({
   statusIconOk: { backgroundColor: color.greenSoft },
   statusIconBad: { backgroundColor: color.redSoft },
   statusTitle: { ...type.h2, fontSize: 22, color: color.ink, textAlign: 'center' },
+  received: {
+    fontFamily: font.extraBold,
+    fontSize: 30,
+    color: color.green,
+    letterSpacing: -0.5,
+    marginTop: space.s3,
+  },
   statusBody: {
     ...type.body,
     color: color.inkDim,

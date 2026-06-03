@@ -12,15 +12,17 @@ import { buildMercuryoPreviewUrl, mercuryoConfigured } from '../../lib/mercuryo'
 import { useNav } from '../../nav';
 import { Button, Icon, NavHeader } from '../../ui';
 
+function shortAddr(a: string): string {
+  return a.length > 16 ? `${a.slice(0, 8)}…${a.slice(-6)}` : a;
+}
+
 /**
  * Mercuryo payment step.
  *
- * Real widget (when EXPO_PUBLIC_MERCURYO_WIDGET_ID is set): a WebView loads the
- * hosted Mercuryo widget. Otherwise — the D2 demo — a MOCK card-payment screen
- * with a sandbox test card. Either way, "Pay" runs the TESTNET deposit bridge:
- * the Sava issuer mints USDC to the user's wallet (real Stellar tx hash) so the
- * deposit actually arrives on-chain (BRIDGE_TESTNET — removed at mainnet, where
- * Mercuryo settles real Circle USDC).
+ * Real widget (EXPO_PUBLIC_MERCURYO_WIDGET_ID set): a WebView loads Mercuryo's
+ * hosted widget. Otherwise — the D2 demo — a mock card-checkout screen, clearly
+ * marked TEST MODE. Either way "Pay" runs the testnet bridge (treasury buys USDC
+ * with XLM on the DEX → user) so the deposit arrives on-chain with a real hash.
  */
 export function MercuryoScreen() {
   const { t, locale } = useTranslation();
@@ -62,7 +64,10 @@ export function MercuryoScreen() {
   const dock = (label: string) => (
     <View style={[styles.dock, { paddingBottom: insets.bottom + space.s2 }]}>
       <Button label={label} onPress={onPay} loading={busy} />
-      <Text style={styles.powered}>{t('mercuryo.powered')}</Text>
+      <View style={styles.poweredRow}>
+        <Icon name="locksmall" size={11} stroke={color.inkFaint} />
+        <Text style={styles.powered}>{t('mercuryo.powered')}</Text>
+      </View>
     </View>
   );
 
@@ -99,57 +104,73 @@ export function MercuryoScreen() {
     );
   }
 
-  // ---- Mock card payment (D2 demo) ----
+  if (busy) {
+    return (
+      <>
+        <NavHeader title={t('mercuryo.title')} subtitle="Mercuryo" center onBack={nav.back} />
+        <View style={styles.processing}>
+          <ActivityIndicator color={color.purple} size="large" />
+          <Text style={styles.processingTitle}>{t('mercuryo.processing')}</Text>
+          <Text style={styles.processingSub}>{t('mercuryo.processingSub')}</Text>
+        </View>
+        {dock(`${t('mercuryo.pay')} ${formatLira(amountTry, locale)}`)}
+      </>
+    );
+  }
+
+  // ---- Mock card checkout (D2 demo) ----
   return (
     <>
       <NavHeader title={t('mercuryo.title')} subtitle="Mercuryo" center onBack={nav.back} />
-      <ScrollView contentContainerStyle={styles.body}>
-        {busy ? (
-          <View style={styles.processing}>
-            <ActivityIndicator color={color.purple} size="large" />
-            <Text style={styles.processingTitle}>{t('mercuryo.processing')}</Text>
-            <Text style={styles.processingSub}>{t('mercuryo.processingSub')}</Text>
+      <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+        <View style={styles.testBanner}>
+          <Icon name="info" size={15} stroke={color.amber} />
+          <Text style={styles.testBannerText}>{t('mercuryo.testMode')}</Text>
+        </View>
+
+        <View style={styles.summary}>
+          <Text style={styles.sumLabel}>{t('mercuryo.youPay')}</Text>
+          <Text style={styles.sumAmount}>{formatLira(amountTry, locale)}</Text>
+          <View style={styles.sumDivider} />
+          <View style={styles.sumRow}>
+            <Text style={styles.sumK}>{t('mercuryo.youGet')}</Text>
+            <Text style={styles.sumVGreen}>≈ {formatUsdc(Number(expectedUsdc), locale)}</Text>
           </View>
-        ) : (
-          <>
-            <View style={styles.card}>
-              <View style={styles.cardTopRow}>
-                <Text style={styles.cardTag}>{t('mercuryo.testCard')}</Text>
-                <Icon name="card" size={22} stroke="rgba(255,255,255,0.8)" />
-              </View>
-              <Text style={styles.cardNumber}>4444 4444 4444 3333</Text>
-              <View style={styles.cardBottomRow}>
-                <View>
-                  <Text style={styles.cardLabel}>{t('mercuryo.cardName')}</Text>
-                </View>
-                <View>
-                  <Text style={styles.cardLabel}>{t('mercuryo.validThru')}</Text>
-                  <Text style={styles.cardValue}>12/30</Text>
-                </View>
-                <View>
-                  <Text style={styles.cardLabel}>{t('mercuryo.cvc')}</Text>
-                  <Text style={styles.cardValue}>•••</Text>
-                </View>
-              </View>
-            </View>
+          <View style={styles.sumRow}>
+            <Text style={styles.sumK}>{t('mercuryo.toWallet')}</Text>
+            <Text style={styles.sumVMono}>{shortAddr(address)}</Text>
+          </View>
+        </View>
 
-            <View style={styles.quote}>
-              <View style={styles.quoteRow}>
-                <Text style={styles.quoteK}>{t('mercuryo.youPay')}</Text>
-                <Text style={styles.quoteV}>{formatLira(amountTry, locale)}</Text>
-              </View>
-              <View style={[styles.quoteRow, styles.quoteRowLast]}>
-                <Text style={styles.quoteK}>{t('mercuryo.youGet')}</Text>
-                <Text style={styles.quoteVGet}>≈ {formatUsdc(Number(expectedUsdc), locale)}</Text>
-              </View>
+        <Text style={styles.formLabel}>{t('mercuryo.testCard')}</Text>
+        <View style={styles.formCard}>
+          <View style={styles.field}>
+            <Text style={styles.fieldKey}>{t('mercuryo.cardNumber')}</Text>
+            <View style={styles.fieldRow}>
+              <Text style={styles.fieldVal}>4444 4444 4444 3333</Text>
+              <Icon name="card" size={20} stroke={color.inkDim} />
             </View>
+          </View>
+          <View style={styles.fieldSplit}>
+            <View style={styles.fieldHalf}>
+              <Text style={styles.fieldKey}>{t('mercuryo.validThru')}</Text>
+              <Text style={styles.fieldVal}>12 / 30</Text>
+            </View>
+            <View style={[styles.fieldHalf, styles.fieldHalfRight]}>
+              <Text style={styles.fieldKey}>{t('mercuryo.cvc')}</Text>
+              <Text style={styles.fieldVal}>•••</Text>
+            </View>
+          </View>
+          <View style={[styles.field, styles.fieldLast]}>
+            <Text style={styles.fieldKey}>{t('mercuryo.nameOnCard')}</Text>
+            <Text style={styles.fieldVal}>{t('mercuryo.cardName')}</Text>
+          </View>
+        </View>
 
-            <View style={styles.note}>
-              <Icon name="locksmall" size={13} stroke={color.inkFaint} />
-              <Text style={styles.noteText}>{t('mercuryo.sandboxNote')}</Text>
-            </View>
-          </>
-        )}
+        <View style={styles.secure}>
+          <Icon name="locksmall" size={13} stroke={color.inkFaint} />
+          <Text style={styles.secureText}>{t('mercuryo.secure')}</Text>
+        </View>
       </ScrollView>
       {dock(`${t('mercuryo.pay')} ${formatLira(amountTry, locale)}`)}
     </>
@@ -157,7 +178,7 @@ export function MercuryoScreen() {
 }
 
 const styles = StyleSheet.create({
-  body: { paddingHorizontal: space.gutter, paddingTop: space.s5 },
+  body: { paddingHorizontal: space.gutter, paddingTop: space.s4, paddingBottom: space.s4 },
   webBody: { flex: 1, overflow: 'hidden' },
   web: { flex: 1, backgroundColor: color.bg },
   loading: {
@@ -173,70 +194,89 @@ const styles = StyleSheet.create({
   },
   loadingText: { ...type.caption, color: color.inkDim },
 
-  card: {
-    backgroundColor: color.purple,
-    borderRadius: radius.lg,
-    padding: space.s5,
-    gap: space.s5,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
+  testBanner: {
+    flexDirection: 'row',
+    gap: 9,
+    alignItems: 'center',
+    backgroundColor: color.amberSoft,
+    borderWidth: 1,
+    borderColor: color.amberBd,
+    borderRadius: radius.md,
+    padding: space.s3,
   },
-  cardTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  cardTag: {
-    fontFamily: font.mono,
-    fontSize: 11,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.85)',
-  },
-  cardNumber: {
-    fontFamily: font.mono,
-    fontSize: 21,
-    letterSpacing: 2,
-    color: '#fff',
-    marginTop: space.s2,
-  },
-  cardBottomRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
-  cardLabel: {
-    fontFamily: font.mono,
-    fontSize: 9,
-    letterSpacing: 0.5,
-    color: 'rgba(255,255,255,0.6)',
-    marginBottom: 3,
-  },
-  cardValue: { fontFamily: font.monoMedium, fontSize: 13, color: '#fff' },
+  testBannerText: { ...type.caption, color: color.amber, flex: 1, lineHeight: 17 },
 
-  quote: {
+  summary: { alignItems: 'center', marginTop: space.s6 },
+  sumLabel: {
+    ...type.label,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    color: color.inkFaint,
+  },
+  sumAmount: {
+    fontFamily: font.extraBold,
+    fontSize: 40,
+    color: color.ink,
+    marginTop: space.s2,
+    letterSpacing: -1,
+  },
+  sumDivider: {
+    height: 1,
+    alignSelf: 'stretch',
+    backgroundColor: color.hairSoft,
+    marginTop: space.s5,
+    marginBottom: space.s1,
+  },
+  sumRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    paddingVertical: space.s3,
+  },
+  sumK: { ...type.body, color: color.inkDim },
+  sumVGreen: { ...type.bodyStrong, fontSize: 15, color: color.green },
+  sumVMono: { fontFamily: font.mono, fontSize: 13, color: color.ink },
+
+  formLabel: {
+    ...type.label,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    color: color.inkFaint,
     marginTop: space.s6,
+    marginBottom: space.s3,
+  },
+  formCard: {
     backgroundColor: color.surface,
     borderWidth: 1,
     borderColor: color.hair,
     borderRadius: radius.md,
     paddingHorizontal: space.s4,
   },
-  quoteRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: color.hairSoft,
+  field: { paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: color.hairSoft },
+  fieldLast: { borderBottomWidth: 0 },
+  fieldKey: {
+    ...type.micro,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    color: color.inkFaint,
+    marginBottom: 6,
   },
-  quoteRowLast: { borderBottomWidth: 0 },
-  quoteK: { ...type.body, color: color.inkDim },
-  quoteV: { ...type.h2, fontSize: 18, color: color.ink },
-  quoteVGet: { ...type.h2, fontSize: 18, color: color.green },
+  fieldRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  fieldVal: { fontFamily: font.mono, fontSize: 15, color: color.ink, letterSpacing: 1 },
+  fieldSplit: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: color.hairSoft },
+  fieldHalf: { flex: 1, paddingVertical: 14 },
+  fieldHalfRight: { borderLeftWidth: 1, borderLeftColor: color.hairSoft, paddingLeft: space.s4 },
 
-  note: { flexDirection: 'row', gap: 8, alignItems: 'flex-start', marginTop: space.s5 },
-  noteText: { ...type.micro, color: color.inkFaint, flex: 1, lineHeight: 16 },
+  secure: { flexDirection: 'row', gap: 8, alignItems: 'flex-start', marginTop: space.s4 },
+  secureText: { ...type.micro, color: color.inkFaint, flex: 1, lineHeight: 16 },
 
   processing: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: space.s8 * 2,
     gap: space.s4,
+    padding: space.s6,
   },
   processingTitle: { ...type.h2, fontSize: 20, color: color.ink, marginTop: space.s2 },
   processingSub: { ...type.body, color: color.inkDim, textAlign: 'center' },
@@ -248,5 +288,6 @@ const styles = StyleSheet.create({
     borderTopColor: color.hairSoft,
     gap: space.s2,
   },
-  powered: { ...type.bodyStrong, fontSize: 12, color: color.inkFaint, textAlign: 'center' },
+  poweredRow: { flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center' },
+  powered: { ...type.bodyStrong, fontSize: 12, color: color.inkFaint },
 });

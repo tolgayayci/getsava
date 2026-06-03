@@ -149,10 +149,11 @@ export const stubBackendClient: BackendClient = {
     if (!o) {
       return null;
     }
-    // Simulated settlement: a while after "payment", USDC "arrives".
+    // Simulated settlement (only when the testnet bridge is OFF): mark arrived
+    // but NEVER fabricate a tx hash — a real hash comes from `settleOrder` after
+    // the on-chain bridge delivery, so the explorer link is always valid.
     if (o.state === 'paid' && o.paidAt && Date.now() - o.paidAt > SIMULATED_SETTLE_MS) {
       o.state = 'settled';
-      o.stellarTxHash = Crypto.randomUUID().replace(/-/g, '');
     }
     return {
       orderId,
