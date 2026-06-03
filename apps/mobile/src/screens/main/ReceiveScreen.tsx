@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useWalletStore } from '../../auth';
 import { useTranslation } from '../../i18n';
 import { useNav } from '../../nav';
-import { Button, Icon, type IconName, NavHeader, QrCode } from '../../ui';
+import { Button, Icon, type IconName, NavHeader, QrCode, UsdcMark } from '../../ui';
 
 /**
  * Receive USDC (YK-570). Two steps: a warning gate, then the address + QR.
@@ -38,7 +38,7 @@ export function ReceiveScreen() {
   if (step === 'warn') {
     return (
       <>
-        <NavHeader title={t('receive.title')} onBack={nav.back} />
+        <NavHeader title={t('receive.title')} onBack={nav.back} leading={<UsdcMark size={22} />} />
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={[styles.body, { paddingBottom: space.s4 }]}
@@ -82,7 +82,11 @@ export function ReceiveScreen() {
 
   return (
     <>
-      <NavHeader title={t('receive.title')} onBack={() => setStep('warn')} />
+      <NavHeader
+        title={t('receive.title')}
+        onBack={() => setStep('warn')}
+        leading={<UsdcMark size={22} />}
+      />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[styles.body, { paddingBottom: space.s4 }]}
@@ -170,18 +174,19 @@ const styles = StyleSheet.create({
     marginTop: 10,
     maxWidth: 300,
   },
-  warnList: { marginTop: space.s5 },
+  warnList: { marginTop: space.s6 },
   wrow: {
     flexDirection: 'row',
-    gap: 13,
-    paddingVertical: 15,
+    alignItems: 'flex-start',
+    gap: 14,
+    paddingVertical: 18,
     borderBottomWidth: 1,
     borderBottomColor: color.hairSoft,
   },
   wrowIc: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     backgroundColor: color.redSoft,
     alignItems: 'center',
     justifyContent: 'center',
@@ -191,13 +196,13 @@ const styles = StyleSheet.create({
   ackBox: {
     flexDirection: 'row',
     gap: 13,
-    alignItems: 'flex-start',
+    alignItems: 'center',
     backgroundColor: color.surface,
     borderWidth: 1,
     borderColor: color.hair,
     borderRadius: radius.md,
     padding: 16,
-    marginTop: space.s4,
+    marginTop: space.s5,
   },
   ackBoxOn: { borderColor: color.purpleBd },
   checkbox: {

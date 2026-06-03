@@ -1,7 +1,6 @@
-import { color } from '@getsava/ui';
 import { StyleSheet, View } from 'react-native';
 import StyledQRCode from 'react-native-qrcode-styled';
-import { Icon } from './Icon';
+import { UsdcMark } from './brand-icons';
 
 interface QrCodeProps {
   /** The exact string the QR encodes (e.g. a Stellar address). */
@@ -12,7 +11,9 @@ interface QrCodeProps {
   badge?: boolean;
 }
 
-/** A real (scannable) QR rendered on a white rounded card, USDC badge centered. */
+const BADGE = 40;
+
+/** A real (scannable) QR on a white rounded card, USDC coin mark centered. */
 export function QrCode({ value, size = 176, badge = true }: QrCodeProps) {
   const pieceSize = Math.max(3, Math.floor((size - 26) / 37));
   return (
@@ -22,11 +23,12 @@ export function QrCode({ value, size = 176, badge = true }: QrCodeProps) {
         pieceSize={pieceSize}
         color="#0c0c0f"
         style={styles.qr}
-        errorCorrectionLevel="M"
+        // High error correction so the center USDC mark never breaks the scan.
+        errorCorrectionLevel="H"
       />
       {badge ? (
         <View style={styles.badge}>
-          <Icon name="usdc" size={20} stroke={color.purple} />
+          <UsdcMark size={BADGE - 6} />
         </View>
       ) : null}
     </View>
@@ -47,14 +49,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    width: 38,
-    height: 38,
-    marginTop: -19,
-    marginLeft: -19,
-    borderRadius: 19,
-    backgroundColor: color.purple,
-    borderWidth: 3,
-    borderColor: '#fff',
+    width: BADGE,
+    height: BADGE,
+    marginTop: -BADGE / 2,
+    marginLeft: -BADGE / 2,
+    borderRadius: BADGE / 2,
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },

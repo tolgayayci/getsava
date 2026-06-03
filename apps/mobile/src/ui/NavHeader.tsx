@@ -1,4 +1,5 @@
 import { color, space, type } from '@getsava/ui';
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon } from './Icon';
 
@@ -12,9 +13,19 @@ interface NavHeaderProps {
   subtitle?: string;
   /** Center the title (used by the payment/send chrome). */
   center?: boolean;
+  /** Node rendered just before the title (e.g. a coin mark). Non-center only. */
+  leading?: ReactNode;
 }
 
-export function NavHeader({ title, onBack, action, onAction, subtitle, center }: NavHeaderProps) {
+export function NavHeader({
+  title,
+  onBack,
+  action,
+  onAction,
+  subtitle,
+  center,
+  leading,
+}: NavHeaderProps) {
   return (
     <View style={styles.row}>
       {onBack ? (
@@ -30,7 +41,10 @@ export function NavHeader({ title, onBack, action, onAction, subtitle, center }:
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
       ) : (
-        <Text style={styles.title}>{title}</Text>
+        <View style={styles.titleRow}>
+          {leading}
+          <Text style={styles.title}>{title}</Text>
+        </View>
       )}
       <View style={styles.spacer} />
       {action ? (
@@ -61,6 +75,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: { ...type.title, color: color.ink },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   centerBox: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
   subtitle: { ...type.caption, color: color.inkFaint, marginTop: 1 },
   spacer: { flex: 1 },

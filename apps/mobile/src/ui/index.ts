@@ -1,5 +1,5 @@
 export { Button } from './Button';
-export { AppleMark, GoogleMark } from './brand-icons';
+export { AppleMark, GoogleMark, USDC_BLUE, UsdcMark } from './brand-icons';
 export { CopyRow } from './CopyRow';
 export { useAppFonts } from './fonts';
 export { Icon, type IconName } from './Icon';

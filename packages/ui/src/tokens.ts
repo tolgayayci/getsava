@@ -43,6 +43,9 @@ export const color = {
   blue: '#67b5e1',
   blueSoft: 'rgba(103, 181, 225, 0.12)',
   blueBd: 'rgba(103, 181, 225, 0.30)',
+  // USDC brand
+  usdc: '#2775ca',
+  usdcSoft: 'rgba(39, 117, 202, 0.16)',
 } as const;
 
 /** 4px base spacing scale + layout gutter. */

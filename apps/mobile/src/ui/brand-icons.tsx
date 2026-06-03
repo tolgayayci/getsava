@@ -1,4 +1,25 @@
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
+
+/** USDC brand blue. */
+export const USDC_BLUE = '#2775ca';
+
+/** USDC coin mark — blue disc + white dollar glyph (Circle's USDC). */
+export function UsdcMark({ size = 24 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Circle cx={12} cy={12} r={12} fill={USDC_BLUE} />
+      <Path d="M12 5.4V18.6" stroke="#fff" strokeWidth={1.7} strokeLinecap="round" />
+      <Path
+        d="M15.3 8.5c-.7-.95-1.85-1.45-3.2-1.45-1.85 0-3.25.95-3.25 2.45 0 3.5 6.55 1.8 6.55 5.35 0 1.55-1.5 2.5-3.45 2.5-1.45 0-2.7-.6-3.4-1.6"
+        fill="none"
+        stroke="#fff"
+        strokeWidth={1.7}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
 
 /** Google "G" mark (full color). */
 export function GoogleMark({ size = 20 }: { size?: number }) {

@@ -2,7 +2,7 @@ import { color, font, radius, space, type } from '@getsava/ui';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from '../../i18n';
 import { useNav } from '../../nav';
-import { Icon, Sheet } from '../../ui';
+import { Icon, Sheet, UsdcMark } from '../../ui';
 
 /** "Add Funds" hub: pick card on-ramp (→ Add Lira) or receive USDC (→ Receive). */
 export function AddFundsSheet() {
@@ -25,6 +25,7 @@ export function AddFundsSheet() {
       <Method
         tone="recv"
         icon="arrowDown"
+        usdc
         title={t('addFunds.recvTitle')}
         tag={t('addFunds.recvTag')}
         desc={t('addFunds.recvDesc')}
@@ -46,6 +47,7 @@ function Method({
   tag,
   desc,
   onPress,
+  usdc,
 }: {
   tone: 'card' | 'recv';
   icon: 'card' | 'arrowDown';
@@ -53,13 +55,14 @@ function Method({
   tag: string;
   desc: string;
   onPress: () => void;
+  usdc?: boolean;
 }) {
   const tint = tone === 'card' ? color.purple : color.green;
-  const bg = tone === 'card' ? color.purpleSoft : color.greenSoft;
+  const bg = usdc ? color.usdcSoft : tone === 'card' ? color.purpleSoft : color.greenSoft;
   return (
     <Pressable style={styles.method} onPress={onPress} accessibilityRole="button">
       <View style={[styles.methodIc, { backgroundColor: bg }]}>
-        <Icon name={icon} size={22} stroke={tint} />
+        {usdc ? <UsdcMark size={26} /> : <Icon name={icon} size={22} stroke={tint} />}
       </View>
       <View style={styles.methodMid}>
         <View style={styles.methodTop}>
