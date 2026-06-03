@@ -3,7 +3,7 @@ import { NETWORK } from './network';
 
 const BRIDGE_SECRET = process.env.EXPO_PUBLIC_BRIDGE_SECRET;
 
-/** True when the testnet mint-bridge is configured (testnet + secret present). */
+/** True when the testnet treasury bridge is configured (testnet + secret present). */
 export function bridgeEnabled(): boolean {
   return NETWORK === 'testnet' && Boolean(BRIDGE_SECRET);
 }
@@ -11,9 +11,10 @@ export function bridgeEnabled(): boolean {
 /**
  * TESTNET deposit bridge (BRIDGE_TESTNET). Stands in for Mercuryo settlement
  * until the sandbox is live: ensure the user holds the USDC trustline
- * (Privy-signed), then the Sava issuer MINTS `amountUsdc` to the user and we
- * return the real Stellar tx hash (links to Stellar Expert). Removed at mainnet,
- * where Mercuryo settles real Circle USDC directly.
+ * (Privy-signed), then the Sava TREASURY TRANSFERS `amountUsdc` of real Circle
+ * testnet USDC (topped up from faucet.circle.com — the same asset Blend's pool
+ * accepts) to the user, returning the real Stellar tx hash (links to Stellar
+ * Expert). Removed at mainnet, where Mercuryo settles Circle USDC directly.
  */
 export async function deliverDeposit(input: {
   userAddress: string;

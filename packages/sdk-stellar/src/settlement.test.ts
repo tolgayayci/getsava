@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { findUsdcSettlement, stellarExpertTxUrl } from './settlement';
 
 const ADDR = 'GUSER';
-const ISSUER = 'GBHJKBFM3O3F4Z5EOLWMGWDTDTTSTU5KRREB6SZHANMYFYMMRLIGIGWK';
+const ISSUER = 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5';
 
 function payment(over: Record<string, unknown>) {
   return {

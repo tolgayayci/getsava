@@ -8,7 +8,7 @@ describe('networkConfig', () => {
     expect(cfg.friendbotUrl).toBe('https://friendbot.stellar.org');
     expect(cfg.usdc).toEqual({
       code: 'USDC',
-      issuer: 'GBHJKBFM3O3F4Z5EOLWMGWDTDTTSTU5KRREB6SZHANMYFYMMRLIGIGWK',
+      issuer: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
     });
   });
 
