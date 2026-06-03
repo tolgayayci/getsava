@@ -377,5 +377,14 @@
     "emptyTitle": "Henüz işlem yok",
     "emptyBody": "Lira eklediğinizde, sağladığınızda, çektiğinizde veya kazandığınızda burada görünür.",
     "variableNote": "Getiri değişkendir ve her gün değişir."
+  },
+  "chart": {
+    "d1": "1G",
+    "w1": "1H",
+    "w2": "2H",
+    "m1": "1A",
+    "m3": "3A",
+    "y1": "1Y",
+    "illustrative": "Örnek — gerçek oran geçmişi kayıttan sonra başlar"
   }
 }

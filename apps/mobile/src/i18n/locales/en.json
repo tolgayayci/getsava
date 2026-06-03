@@ -377,5 +377,14 @@
     "emptyTitle": "No activity yet",
     "emptyBody": "When you add lira, supply, withdraw or earn, it shows up here.",
     "variableNote": "Yield is variable and moves daily."
+  },
+  "chart": {
+    "d1": "1D",
+    "w1": "1W",
+    "w2": "2W",
+    "m1": "1M",
+    "m3": "3M",
+    "y1": "1Y",
+    "illustrative": "Illustrative — live rate history begins once recorded"
   }
 }

@@ -1,8 +1,19 @@
 import { color, font, radius, space, type } from '@getsava/ui';
-import { StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
+import { useRef, useState } from 'react';
+import {
+  type GestureResponderEvent,
+  type LayoutChangeEvent,
+  PanResponder,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import Svg, { Circle, Defs, Line, LinearGradient, Path, Stop } from 'react-native-svg';
 import { formatLira, formatPct, formatUsdc, useTranslation } from '../i18n';
 import { usdcToTry } from '../lib/fx';
+import type { ChartPoint, Timeframe } from '../lib/rate-series';
+import { TIMEFRAMES } from '../lib/rate-series';
 import { Button } from './Button';
 import { Icon } from './Icon';
 import { Sheet } from './Sheet';
@@ -38,63 +49,220 @@ export function StatusPill({ status }: { status: number }) {
   );
 }
 
-const CHART_W = 353;
-const CHART_PAD = 6;
+const CHART_H = 200;
+const PAD_TOP = 22; // headroom for the floating value pill
+const PAD_BOTTOM = 8;
 
-/** Robinhood-style APY area+line chart. Green when up, red when up === false. */
-export function RateChart({
-  values,
-  up = true,
-  height = 150,
-}: {
-  values: number[];
-  up?: boolean;
-  height?: number;
-}) {
-  const n = values.length;
-  if (n < 2) {
-    return <View style={{ height }} />;
+/** Catmull-Rom → cubic-bezier smoothing for a soft, trading-app line. */
+function smoothPath(pts: ReadonlyArray<readonly [number, number]>): string {
+  if (pts.length < 2) {
+    return '';
   }
+  const at = (k: number): readonly [number, number] =>
+    pts[Math.max(0, Math.min(pts.length - 1, k))] as readonly [number, number];
+  let d = `M${at(0)[0].toFixed(1)} ${at(0)[1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = at(i - 1);
+    const p1 = at(i);
+    const p2 = at(i + 1);
+    const p3 = at(i + 2);
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += ` C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
+
+/**
+ * Full-width interactive APY chart (Midas/Robinhood-style): smooth area+line with
+ * a touch-drag crosshair + value pill. Green when the window rises, red when it
+ * falls. Width is measured via onLayout so touch x maps 1:1 to a data point.
+ */
+export function RateChart({
+  data,
+  height = CHART_H,
+  formatTime,
+}: {
+  data: ChartPoint[];
+  height?: number;
+  formatTime?: (t: number) => string;
+}) {
+  const { locale } = useTranslation();
+  const [w, setW] = useState(0);
+  const [scrub, setScrub] = useState<number | null>(null);
+
+  const wRef = useRef(0);
+  const nRef = useRef(data.length);
+  nRef.current = data.length;
+
+  function onTouch(e: GestureResponderEvent) {
+    const width = wRef.current || 1;
+    const n = nRef.current;
+    const x = e.nativeEvent.locationX;
+    setScrub(Math.max(0, Math.min(n - 1, Math.round((x / width) * (n - 1)))));
+  }
+
+  const panRef = useRef<ReturnType<typeof PanResponder.create> | null>(null);
+  if (panRef.current === null) {
+    panRef.current = PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dx) > 6 && Math.abs(g.dx) > Math.abs(g.dy),
+      onPanResponderGrant: onTouch,
+      onPanResponderMove: onTouch,
+      onPanResponderRelease: () => setScrub(null),
+      onPanResponderTerminate: () => setScrub(null),
+    });
+  }
+
+  const onLayout = (e: LayoutChangeEvent) => {
+    wRef.current = e.nativeEvent.layout.width;
+    setW(e.nativeEvent.layout.width);
+  };
+
+  if (w === 0 || data.length < 2) {
+    return <View style={{ height }} onLayout={onLayout} />;
+  }
+
+  const n = data.length;
+  const values = data.map((d) => d.v);
   const min = Math.min(...values);
   const max = Math.max(...values);
-  const span = max - min || 1;
-  const innerH = height - CHART_PAD * 2 - 18;
-  const px = (i: number) => CHART_PAD + (i / (n - 1)) * (CHART_W - CHART_PAD * 2);
-  const py = (v: number) => CHART_PAD + (1 - (v - min) / span) * innerH;
-  const pts = values.map((v, i) => [px(i), py(v)] as const);
-  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
-  const baseY = (height - CHART_PAD).toFixed(1);
-  const area = `${line} L${px(n - 1).toFixed(1)} ${baseY} L${px(0).toFixed(1)} ${baseY} Z`;
-  const tint = up === false ? color.red : color.green;
-  const last = pts[n - 1] ?? ([0, 0] as const);
+  const sp = max - min || 1;
+  const innerH = height - PAD_TOP - PAD_BOTTOM;
+  const xAt = (i: number) => (i / (n - 1)) * w;
+  const yAt = (v: number) => PAD_TOP + (1 - (v - min) / sp) * innerH;
+  const pts = data.map((d, i) => [xAt(i), yAt(d.v)] as const);
+
+  const rising = (data[n - 1]?.v ?? 0) >= (data[0]?.v ?? 0);
+  const tint = rising ? color.green : color.red;
+  const line = smoothPath(pts);
+  const baseY = (height - PAD_BOTTOM).toFixed(1);
+  const area = `${line} L${xAt(n - 1).toFixed(1)} ${baseY} L0 ${baseY} Z`;
+  const lastPt = pts[n - 1] ?? ([0, 0] as const);
+
+  const sIdx = scrub ?? n - 1;
+  const sPt = pts[sIdx] ?? lastPt;
+  const sVal = data[sIdx]?.v ?? 0;
+  const pillW = 92;
+  const pillLeft = Math.max(0, Math.min(w - pillW, sPt[0] - pillW / 2));
 
   return (
-    <Svg
-      width="100%"
-      height={height}
-      viewBox={`0 0 ${CHART_W} ${height}`}
-      preserveAspectRatio="none"
-    >
-      <Defs>
-        <LinearGradient id="rateFill" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0%" stopColor={tint} stopOpacity={0.22} />
-          <Stop offset="100%" stopColor={tint} stopOpacity={0} />
-        </LinearGradient>
-      </Defs>
-      <Path d={area} fill="url(#rateFill)" />
-      <Path
-        d={line}
-        fill="none"
-        stroke={tint}
-        strokeWidth={2.2}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-      <Circle cx={last[0]} cy={last[1]} r={8} fill={tint} fillOpacity={0.2} />
-      <Circle cx={last[0]} cy={last[1]} r={4} fill={tint} />
-    </Svg>
+    <View style={{ height }} onLayout={onLayout} {...panRef.current.panHandlers}>
+      <Svg width={w} height={height}>
+        <Defs>
+          <LinearGradient id="rateFill" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0%" stopColor={tint} stopOpacity={0.2} />
+            <Stop offset="100%" stopColor={tint} stopOpacity={0} />
+          </LinearGradient>
+        </Defs>
+        <Path d={area} fill="url(#rateFill)" />
+        <Path
+          d={line}
+          fill="none"
+          stroke={tint}
+          strokeWidth={2.2}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        {scrub === null ? (
+          <>
+            <Circle cx={lastPt[0]} cy={lastPt[1]} r={8} fill={tint} fillOpacity={0.18} />
+            <Circle cx={lastPt[0]} cy={lastPt[1]} r={4} fill={tint} />
+          </>
+        ) : (
+          <>
+            <Line
+              x1={sPt[0]}
+              y1={PAD_TOP - 6}
+              x2={sPt[0]}
+              y2={height - PAD_BOTTOM}
+              stroke={color.hair}
+              strokeWidth={1}
+              strokeDasharray="3 4"
+            />
+            <Circle cx={sPt[0]} cy={sPt[1]} r={9} fill={tint} fillOpacity={0.18} />
+            <Circle cx={sPt[0]} cy={sPt[1]} r={5} fill={tint} stroke={color.bg} strokeWidth={2} />
+          </>
+        )}
+      </Svg>
+      {scrub !== null ? (
+        <View style={[chartStyles.pill, { left: pillLeft, width: pillW }]} pointerEvents="none">
+          <Text style={chartStyles.pillVal}>{formatPct(sVal, locale)}</Text>
+          {formatTime ? (
+            <Text style={chartStyles.pillTime}>{formatTime(data[sIdx]?.t ?? 0)}</Text>
+          ) : null}
+        </View>
+      ) : null}
+    </View>
   );
 }
+
+const TF_KEY: Record<Timeframe, string> = {
+  '1D': 'd1',
+  '1W': 'w1',
+  '2W': 'w2',
+  '1M': 'm1',
+  '3M': 'm3',
+  '1Y': 'y1',
+};
+
+/** Range selector under the chart (1D · 1W · 2W · 1M · 3M · 1Y). */
+export function TimeframeTabs({
+  value,
+  onChange,
+}: {
+  value: Timeframe;
+  onChange: (tf: Timeframe) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <View style={chartStyles.tabs}>
+      {TIMEFRAMES.map((tf) => {
+        const active = tf === value;
+        return (
+          <Pressable
+            key={tf}
+            onPress={() => onChange(tf)}
+            style={[chartStyles.tab, active && chartStyles.tabActive]}
+            hitSlop={6}
+          >
+            <Text style={[chartStyles.tabLabel, active && chartStyles.tabLabelActive]}>
+              {t(`chart.${TF_KEY[tf]}` as Parameters<typeof t>[0])}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+const chartStyles = StyleSheet.create({
+  pill: {
+    position: 'absolute',
+    top: 0,
+    alignItems: 'center',
+    backgroundColor: color.surface2,
+    borderRadius: radius.sm,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: color.hair,
+  },
+  pillVal: { fontFamily: font.bold, fontSize: 13, color: color.ink },
+  pillTime: { fontFamily: font.regular, fontSize: 10, color: color.inkFaint, marginTop: 1 },
+  tabs: { flexDirection: 'row', gap: 6, marginTop: space.s3 },
+  tab: {
+    flex: 1,
+    height: 30,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabActive: { backgroundColor: color.surface2 },
+  tabLabel: { fontFamily: font.semiBold, fontSize: 12, color: color.inkFaint },
+  tabLabelActive: { color: color.ink },
+});
 
 /** Vault list card. Tappable row with rate, risk, pool size and your value / CTA. */
 export function Vrow({

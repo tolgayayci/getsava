@@ -1,10 +1,11 @@
 import { color, font, space, type } from '@getsava/ui';
 import * as WebBrowser from 'expo-web-browser';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatPct, useTranslation } from '../../i18n';
 import { NETWORK } from '../../lib/network';
+import { buildRateSeries, type Timeframe } from '../../lib/rate-series';
 import { useVault } from '../../lib/useVault';
 import { useNav } from '../../nav';
 import { Button, Icon, NavHeader, Notice, UsdcMark } from '../../ui';
@@ -15,6 +16,7 @@ import {
   PoolStats,
   RateChart,
   StatusPill,
+  TimeframeTabs,
   Vpos,
 } from '../../ui/vault-bits';
 
@@ -29,14 +31,17 @@ function stellarExpertPoolUrl(): string {
   return `https://stellar.expert/explorer/${NETWORK}/contract/${POOL}`;
 }
 
-/**
- * Synthesize a gentle illustrative APY series around the live rate. There is no
- * history API yet, so this is purely a visual hint of stability (the rate is
- * always qualified as variable).
- */
-function apySeries(apy: number): number[] {
-  const wobble = [-0.04, 0.03, -0.02, 0.05, -0.01, 0.04, -0.03, 0.06, 0.0, 0.05];
-  return wobble.map((d) => Math.max(0, apy + d));
+/** Short axis label for the scrub pill, per timeframe. */
+function formatTick(ts: number, tf: Timeframe, locale: string): string {
+  const d = new Date(ts);
+  const loc = locale === 'tr' ? 'tr-TR' : 'en-US';
+  try {
+    return tf === '1D'
+      ? d.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' })
+      : d.toLocaleDateString(loc, { day: 'numeric', month: 'short' });
+  } catch {
+    return `${d.getDate()}/${d.getMonth() + 1}`;
+  }
 }
 
 export function VaultDetailScreen() {
@@ -46,6 +51,9 @@ export function VaultDetailScreen() {
   const { vault } = useVault();
 
   const [learnOpen, setLearnOpen] = useState(false);
+  const [tf, setTf] = useState<Timeframe>('1M');
+  const apy = vault?.apy ?? 0;
+  const series = useMemo(() => buildRateSeries(tf, apy, Date.now()), [tf, apy]);
 
   if (vault === null) {
     return (
@@ -57,8 +65,6 @@ export function VaultDetailScreen() {
       </>
     );
   }
-
-  const values = apySeries(vault.apy);
 
   return (
     <>
@@ -90,11 +96,12 @@ export function VaultDetailScreen() {
           </View>
         </View>
 
-        {/* Illustrative rate chart */}
-        <View style={styles.chart}>
-          <RateChart values={values} up height={120} />
-          <Text style={styles.chartNote}>{t('vault.past30')}</Text>
+        {/* Interactive rate chart — full-bleed, drag to scrub */}
+        <View style={styles.chartBleed}>
+          <RateChart data={series} formatTime={(ts) => formatTick(ts, tf, locale)} />
         </View>
+        <TimeframeTabs value={tf} onChange={setTf} />
+        <Text style={styles.chartNote}>{t('chart.illustrative')}</Text>
 
         {/* APY composition */}
         <BreakdownBar basePct={vault.apy} rewardsPct={0} />
@@ -209,12 +216,13 @@ const styles = StyleSheet.create({
   },
   heroQual: { flexDirection: 'row', alignItems: 'center', gap: space.s1, marginTop: space.s2 },
   heroQualText: { ...type.caption, color: color.amber },
-  chart: { marginBottom: space.s5 },
+  chartBleed: { marginHorizontal: -space.gutter },
   chartNote: {
     ...type.caption,
     color: color.inkFaint,
     textAlign: 'center',
-    marginTop: space.s2,
+    marginTop: space.s3,
+    marginBottom: space.s5,
   },
   bdNote: {
     ...type.caption,
