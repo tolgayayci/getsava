@@ -1,4 +1,4 @@
-import { color, font, radius, space, type } from '@getsava/ui';
+import { color, radius, space, type } from '@getsava/ui';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

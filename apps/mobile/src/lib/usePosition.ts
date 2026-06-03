@@ -1,7 +1,8 @@
+import { useVault } from './useVault';
+
 /**
- * Blend supply position (T1.D3). There's no supply flow yet, so there's no
- * vault position to show — Home renders the "In your wallet" row but hides the
- * vault row until this returns a real position.
+ * Blend supply position for Home. Derived from the live vault state — Home shows
+ * the "In your wallet" row always, and the vault row only when there's a position.
  */
 export interface Position {
   readonly vaultName: string;
@@ -11,5 +12,14 @@ export interface Position {
 }
 
 export function usePosition(): Position | null {
-  return null;
+  const { vault } = useVault();
+  if (!vault?.supplied) {
+    return null;
+  }
+  return {
+    vaultName: vault.name,
+    suppliedUsdc: vault.suppliedUsdc,
+    yieldUsdc: vault.yieldUsdc,
+    rate: vault.apy,
+  };
 }

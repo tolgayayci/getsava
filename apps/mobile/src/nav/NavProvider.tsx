@@ -14,9 +14,18 @@ import type { TabId } from '../ui';
 import { Toast } from '../ui';
 
 /** Full-screen routes pushed above the tab shell. */
-export type StackRoute = 'addLira' | 'mercuryo' | 'order' | 'receive' | 'send' | 'activity';
+export type StackRoute =
+  | 'addLira'
+  | 'mercuryo'
+  | 'order'
+  | 'receive'
+  | 'send'
+  | 'activity'
+  | 'vault'
+  | 'supply'
+  | 'vaultWithdraw';
 /** Bottom-sheet overlays. */
-export type SheetId = 'addFunds';
+export type SheetId = 'addFunds' | 'learn';
 /** Home balance display currency. */
 export type DisplayCurrency = 'try' | 'usd';
 

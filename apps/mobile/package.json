@@ -16,6 +16,7 @@
     "@exodus/patch-broken-hermes-typed-arrays": "1.0.0-alpha.1",
     "@expo-google-fonts/hanken-grotesk": "^0.4.3",
     "@expo-google-fonts/spline-sans-mono": "^0.4.2",
+    "@getsava/sdk-blend": "workspace:*",
     "@getsava/sdk-stellar": "workspace:*",
     "@getsava/types": "workspace:*",
     "@getsava/ui": "workspace:*",
