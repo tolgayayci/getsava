@@ -120,7 +120,8 @@
     "kycTitle": "ID check required for this amount",
     "kycBody": "Orders over €699 need a quick identity check by Mercuryo. You'll do it on the next step.",
     "buying": "You're buying USDC on the Stellar network — held in your own wallet, not by Sava.",
-    "partner": "Card payment & ID checks handled by Mercuryo, a licensed EU payment partner. Not by Sava.",
+    "partner": "Card payment & ID checks handled by Mercuryo, a licensed EU payment partner.",
+    "tapToEnter": "Tap to enter amount",
     "cta": "Continue to payment"
   },
   "mercuryo": {

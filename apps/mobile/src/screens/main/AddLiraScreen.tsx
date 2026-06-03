@@ -1,6 +1,6 @@
 import { color, font, space, type } from '@getsava/ui';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { LayoutAnimation, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { stubBackendClient } from '../../backend/client';
 import { formatLira, formatUsdc, useTranslation } from '../../i18n';
@@ -21,6 +21,7 @@ export function AddLiraScreen() {
   const insets = useSafeAreaInsets();
   const [val, setVal] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [padOpen, setPadOpen] = useState(false);
 
   const recv = val / FX_TRY_PER_USDC;
   const below = val > 0 && val < MIN_TRY;
@@ -29,6 +30,18 @@ export function AddLiraScreen() {
   const valid = val >= MIN_TRY && val <= MAX_TRY;
   const symPre = locale !== 'tr';
   const display = val === 0 ? '0' : groupTry(val);
+
+  const togglePad = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.create(200, 'easeInEaseOut', 'opacity'));
+    setPadOpen((o) => !o);
+  };
+
+  const setAmount = (n: number) => {
+    setVal(n);
+    if (!padOpen) {
+      togglePad();
+    }
+  };
 
   const press = (k: KeypadKey) => {
     if (k === 'del') {
@@ -61,7 +74,7 @@ export function AddLiraScreen() {
     <>
       <NavHeader title={t('addLira.title')} onBack={nav.back} />
       <View style={styles.body}>
-        <View style={styles.amount}>
+        <Pressable style={styles.amount} onPress={togglePad} accessibilityRole="button">
           <Text style={styles.payLabel}>{t('addLira.youPay')}</Text>
           <View style={styles.amtLine}>
             {symPre ? <Text style={styles.sym}>₺</Text> : null}
@@ -78,7 +91,7 @@ export function AddLiraScreen() {
               <Pressable
                 key={q}
                 style={styles.chip}
-                onPress={() => setVal(q)}
+                onPress={() => setAmount(q)}
                 accessibilityRole="button"
               >
                 <Text style={styles.chipText}>₺{groupTry(q)}</Text>
@@ -111,15 +124,14 @@ export function AddLiraScreen() {
                 body={t('addLira.kycBody')}
               />
             </View>
+          ) : !padOpen ? (
+            <Text style={styles.hint}>{t('addLira.tapToEnter')}</Text>
           ) : null}
-        </View>
+        </Pressable>
 
-        <View style={styles.note}>
-          <Icon name="spark" size={13} stroke={color.green} />
-          <Text style={styles.noteText}>{t('addLira.buying')}</Text>
-        </View>
-
-        <Keypad onKey={press} variant="integer" clearLabel={t('common.cancel')} />
+        {padOpen ? (
+          <Keypad onKey={press} variant="integer" clearLabel={t('common.cancel')} />
+        ) : null}
       </View>
 
       <View style={[styles.dock, { paddingBottom: insets.bottom + space.s2 }]}>
@@ -174,22 +186,7 @@ const styles = StyleSheet.create({
   },
   errText: { ...type.caption, color: color.red },
   kyc: { marginTop: space.s5, alignSelf: 'stretch' },
-  note: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 7,
-    marginBottom: space.s4,
-    maxWidth: 320,
-    alignSelf: 'center',
-  },
-  noteText: {
-    ...type.micro,
-    color: color.inkFaint,
-    lineHeight: 16,
-    textAlign: 'center',
-    flexShrink: 1,
-  },
+  hint: { ...type.caption, color: color.inkFaint, marginTop: space.s5 },
   dock: {
     paddingHorizontal: space.gutter,
     paddingTop: space.s3,

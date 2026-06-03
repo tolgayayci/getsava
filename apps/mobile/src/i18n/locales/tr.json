@@ -120,7 +120,8 @@
     "kycTitle": "Bu tutar için kimlik doğrulaması gerekir",
     "kycBody": "€699 üzeri işlemler için Mercuryo'nun hızlı kimlik doğrulaması gerekir. Bir sonraki adımda yaparsınız.",
     "buying": "USDC'yi Stellar ağı üzerinden alıyorsunuz — Sava değil, kendi cüzdanınızda saklanır.",
-    "partner": "Kart ödemesi ve kimlik doğrulaması, lisanslı bir AB ödeme ortağı olan Mercuryo tarafından yapılır. Sava tarafından değil.",
+    "partner": "Kart ödemesi ve kimlik doğrulaması, lisanslı bir AB ödeme ortağı olan Mercuryo tarafından yapılır.",
+    "tapToEnter": "Tutar girmek için dokunun",
     "cta": "Ödemeye devam et"
   },
   "mercuryo": {
