@@ -1,12 +1,24 @@
 /**
  * @getsava/sdk-blend — the ONLY module allowed to import `@blend-capital/blend-sdk`.
  *
- * Safety guardrail (Layer 2 of the defense-in-depth): YK-468 adds
- * `ALLOWED_REQUEST_TYPES = [SupplyCollateral, WithdrawCollateral] as const`, the
- * derived `SafeRequestType`, an `assertSafeRequestType()` runtime guard, and a
- * lint rule banning direct `@blend-capital/blend-sdk` imports elsewhere. No code
- * path may ever construct Borrow / Repay / Liquidate.
- *
- * Placeholder export keeps the package importable until that lands.
+ * Supply-only Blend v2 wrapper: narrows RequestType to SupplyCollateral(2) +
+ * WithdrawCollateral(3) via {@link assertSafeRequestType}; everything else
+ * (Borrow/Repay/auction fills) is structurally unreachable. A lint rule bans
+ * direct `@blend-capital/blend-sdk` imports anywhere else. See INTEGRATION.md.
  */
-export const SDK_BLEND_PACKAGE = '@getsava/sdk-blend';
+export { toStroops } from './amount';
+export { type BackstopHealth, readBackstopHealth } from './backstop';
+export { type BlendNetworkConfig, blendConfig, blendNetwork, USDC_DECIMALS } from './config';
+export { ALLOWED_REQUEST_TYPES, assertSafeRequestType, type SafeRequestType } from './guardrail';
+export {
+  getReserve,
+  getSupplyApy,
+  loadPool,
+  type ReserveSnapshot,
+  readReserveSnapshot,
+  readUserPosition,
+  type UserPosition,
+} from './pool';
+export { supplyRequest, type WithdrawMode, withdrawRequest } from './request';
+export { type SubmitResult, signAndSubmit } from './submit';
+export { type BuildResult, buildSupplyTx, buildWithdrawTx, submitOpXdr } from './tx';

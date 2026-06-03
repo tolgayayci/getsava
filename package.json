@@ -28,6 +28,9 @@
     "typescript": "^6.0.0"
   },
   "pnpm": {
+    "overrides": {
+      "@stellar/stellar-base": "14.1.0"
+    },
     "onlyBuiltDependencies": [
       "@biomejs/biome",
       "esbuild",
