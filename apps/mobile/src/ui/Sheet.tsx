@@ -3,6 +3,9 @@ import type { ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+/** How far the sheet bleeds below the screen edge (fills the device corners). */
+const BLEED = 48;
+
 interface SheetProps {
   visible: boolean;
   onClose?: (() => void) | undefined;
@@ -19,7 +22,7 @@ interface SheetProps {
 export function Sheet({ visible, onClose, title, children, dock }: SheetProps) {
   const insets = useSafeAreaInsets();
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <View style={styles.fill}>
         <Pressable
           style={styles.scrim}
@@ -27,7 +30,14 @@ export function Sheet({ visible, onClose, title, children, dock }: SheetProps) {
           accessibilityRole="button"
           accessibilityLabel="Close"
         />
-        <View style={[styles.sheet, { paddingBottom: space.s4 + insets.bottom }]}>
+        {/* Bleed the sheet BLEED px below the screen so the device's rounded
+            corners are filled with the sheet color, not the dimmed scrim. */}
+        <View
+          style={[
+            styles.sheet,
+            { paddingBottom: space.s4 + insets.bottom + BLEED, marginBottom: -BLEED },
+          ]}
+        >
           <View style={styles.grab} />
           {title ? <Text style={styles.title}>{title}</Text> : null}
           {children ? (
