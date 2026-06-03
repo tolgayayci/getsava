@@ -41,7 +41,7 @@ export function ReceiveScreen() {
         <NavHeader title={t('receive.title')} onBack={nav.back} leading={<UsdcMark size={22} />} />
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={[styles.body, { paddingBottom: space.s4 }]}
+          contentContainerStyle={[styles.body, styles.warnCenter, { paddingBottom: space.s4 }]}
         >
           <View style={styles.warnHero}>
             <View style={styles.warnIc}>
@@ -154,6 +154,7 @@ function MetaRow({
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
   body: { paddingHorizontal: space.gutter },
+  warnCenter: { flexGrow: 1, justifyContent: 'center' },
   flex: { flex: 1 },
 
   warnHero: { alignItems: 'center', paddingTop: space.s4, paddingBottom: space.s1 },
