@@ -37,8 +37,17 @@ const emptyModule = require.resolve('./empty-module.js');
 // `util` needs a real (tiny) polyfill: eventsource uses util.inherits.
 const utilShim = require.resolve('./util-shim.js');
 
+// Packages we deliberately exclude from the bundle. `eventsource` is the Horizon
+// Server-Sent-Events client (used only by `Horizon.Server.stream()`); Sava reads
+// chain state via Soroban RPC + Horizon REST and never streams, so empty-shimming
+// it avoids pulling Node-only `events`/`url` that it requires at module load.
+const emptyPackages = new Set(['eventsource']);
+
 const originalResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (emptyPackages.has(moduleName)) {
+    return { filePath: emptyModule, type: 'sourceFile' };
+  }
   const override = browserOverrides[moduleName];
   if (override) {
     try {
