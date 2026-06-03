@@ -16,7 +16,8 @@
     "test": "turbo run test",
     "i18n:check": "tsx packages/config/bin/check-i18n-parity.ts",
     "terms:check": "tsx packages/config/bin/check-banned-terms.ts",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm i18n:check && pnpm terms:check && pnpm build",
+    "blend:check": "tsx packages/config/bin/check-blend-imports.ts",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm i18n:check && pnpm terms:check && pnpm blend:check && pnpm build",
     "prepare": "lefthook install"
   },
   "devDependencies": {

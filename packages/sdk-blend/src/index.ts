@@ -8,6 +8,13 @@
  */
 export { toStroops } from './amount';
 export { type BackstopHealth, readBackstopHealth } from './backstop';
+export {
+  CIRCUIT_THRESHOLDS,
+  type CircuitInputs,
+  type CircuitState,
+  evaluateCircuitBreaker,
+  type TripReason,
+} from './circuit';
 export { type BlendNetworkConfig, blendConfig, blendNetwork, USDC_DECIMALS } from './config';
 export { ALLOWED_REQUEST_TYPES, assertSafeRequestType, type SafeRequestType } from './guardrail';
 export {
