@@ -149,11 +149,7 @@ export function HomeScreen() {
             <Icon name="plus" size={17} stroke={color.purpleInk} />
             <Text style={[styles.actionText, styles.actionTextPrimary]}>{t('home.add')}</Text>
           </Pressable>
-          <Pressable
-            style={[styles.action, idle <= 1e-7 && styles.actionDisabled]}
-            disabled={idle <= 1e-7}
-            onPress={() => nav.push('send')}
-          >
+          <Pressable style={styles.action} onPress={() => nav.push('send')}>
             <Icon name="arrowUp" size={17} />
             <Text style={styles.actionText}>{t('home.withdraw')}</Text>
           </Pressable>
@@ -302,7 +298,6 @@ const styles = StyleSheet.create({
     gap: 7,
   },
   actionPrimary: { backgroundColor: color.purple, borderColor: color.purple },
-  actionDisabled: { opacity: 0.4 },
   actionText: { fontFamily: font.bold, fontSize: 13.5, color: color.ink },
   actionTextPrimary: { color: color.purpleInk },
 
