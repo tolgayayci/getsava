@@ -16,22 +16,29 @@ interface SheetProps {
 }
 
 /**
- * Bottom sheet. Tapping the scrim above the panel closes it (unless `onClose`
- * is omitted — e.g. during an in-flight submit). Mirrors the handoff `Sheet`.
+ * Bottom sheet. A full-screen scrim sits BEHIND the panel (so the panel's
+ * rounded top corners render over a uniform dim, not the un-dimmed screen), and
+ * the panel bleeds below the screen edge so the device's rounded bottom corners
+ * fill with the sheet color. Tapping the scrim closes it (unless `onClose` is
+ * omitted — e.g. during an in-flight submit).
  */
 export function Sheet({ visible, onClose, title, children, dock }: SheetProps) {
   const insets = useSafeAreaInsets();
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
-      <View style={styles.fill}>
-        <Pressable
-          style={styles.scrim}
-          onPress={onClose}
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-        />
-        {/* Bleed the sheet BLEED px below the screen so the device's rounded
-            corners are filled with the sheet color, not the dimmed scrim. */}
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <Pressable
+        style={styles.scrim}
+        onPress={onClose}
+        accessibilityRole="button"
+        accessibilityLabel="Close"
+      />
+      <View style={styles.fill} pointerEvents="box-none">
         <View
           style={[
             styles.sheet,
@@ -57,14 +64,19 @@ export function Sheet({ visible, onClose, title, children, dock }: SheetProps) {
 }
 
 const styles = StyleSheet.create({
+  scrim: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
   fill: { flex: 1, justifyContent: 'flex-end' },
-  scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
   sheet: {
     backgroundColor: color.bg2,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    borderTopWidth: 1,
-    borderColor: color.hair,
     paddingHorizontal: space.gutter,
     paddingTop: space.s3,
     maxHeight: '88%',
