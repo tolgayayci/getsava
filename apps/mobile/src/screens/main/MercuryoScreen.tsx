@@ -53,9 +53,11 @@ export function MercuryoScreen() {
           <WebView
             source={{ uri: widgetUrl }}
             style={styles.web}
+            originWhitelist={['*']}
+            javaScriptEnabled
+            domStorageEnabled
             startInLoadingState
             onError={() => setFailed(true)}
-            onHttpError={() => setFailed(true)}
             renderLoading={() => (
               <View style={styles.loading}>
                 <ActivityIndicator color={color.purple} />
