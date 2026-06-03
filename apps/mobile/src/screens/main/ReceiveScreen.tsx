@@ -113,6 +113,17 @@ export function ReceiveScreen() {
           </View>
         </View>
 
+        <View style={styles.field}>
+          <View style={styles.fieldHead}>
+            <Text style={styles.fieldKey}>{t('receive.memo')}</Text>
+            <View style={styles.memoTag}>
+              <Text style={styles.memoTagText}>{t('receive.memoTag')}</Text>
+            </View>
+          </View>
+          <Text style={styles.memoDash}>—</Text>
+          <Text style={styles.fieldNote}>{t('receive.memoNote')}</Text>
+        </View>
+
         <View style={styles.meta}>
           <MetaRow k={t('receive.net')} v={t('receive.netValue')} dot />
           <MetaRow k={t('receive.asset')} v="USDC" />
@@ -224,8 +235,14 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
 
-  qrWrap: { alignItems: 'center', marginTop: space.s2, marginBottom: space.s5 },
+  qrWrap: { alignItems: 'center', marginTop: space.s7, marginBottom: space.s6 },
   field: { paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: color.hair },
+  fieldHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
   fieldKey: {
     ...type.label,
     letterSpacing: 0.6,
@@ -233,6 +250,21 @@ const styles = StyleSheet.create({
     color: color.inkFaint,
     marginBottom: 8,
   },
+  memoTag: {
+    backgroundColor: color.surface2,
+    borderRadius: 5,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  memoTagText: {
+    fontFamily: font.mono,
+    fontSize: 9.5,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    color: color.inkFaint,
+  },
+  memoDash: { fontFamily: font.mono, fontSize: 16, color: color.inkDim },
+  fieldNote: { ...type.caption, color: color.inkFaint, marginTop: 8, lineHeight: 18 },
   fieldRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   addr: { flex: 1, fontFamily: font.mono, fontSize: 15, color: color.ink, lineHeight: 22 },
   addrHl: { color: color.purple, fontFamily: font.monoMedium },
