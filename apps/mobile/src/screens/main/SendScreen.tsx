@@ -96,6 +96,7 @@ export function SendScreen() {
       <NavHeader title={t('send.title')} subtitle={t('send.network')} center onBack={nav.back} />
       <View style={styles.body}>
         <View style={styles.amount}>
+          <Text style={styles.amtLabel}>{t('send.amount')}</Text>
           <View style={styles.amtLine}>
             <Text style={[styles.val, amt === 0 && styles.valPh]}>{dispAmt}</Text>
             <Text style={styles.cur}>USDC</Text>
@@ -130,7 +131,7 @@ export function SendScreen() {
         </View>
         <View style={styles.warn}>
           <Icon name="alert" size={13} stroke={color.red} />
-          <Text style={styles.warnText}>{t('send.netNote')}</Text>
+          <Text style={styles.warnText}>{t('send.reminder')}</Text>
         </View>
 
         <Keypad onKey={press} variant="decimal" decimalLabel={locale === 'tr' ? ',' : '.'} />
@@ -200,7 +201,14 @@ function SumRow({ k, v, mono, last }: { k: string; v: string; mono?: boolean; la
 
 const styles = StyleSheet.create({
   body: { flex: 1, paddingHorizontal: space.gutter },
-  amount: { paddingTop: space.s6, alignItems: 'center' },
+  amount: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  amtLabel: {
+    ...type.label,
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    color: color.inkFaint,
+    marginBottom: space.s4,
+  },
   amtLine: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', gap: 12 },
   val: { fontFamily: font.extraBold, fontSize: 46, color: color.ink, letterSpacing: -1.4 },
   valPh: { color: color.inkFaint },
@@ -245,11 +253,12 @@ const styles = StyleSheet.create({
   warn: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 7,
     marginTop: space.s3,
     marginBottom: space.s4,
   },
-  warnText: { ...type.micro, color: color.red, flex: 1, lineHeight: 15 },
+  warnText: { ...type.micro, color: color.red, fontFamily: font.semiBold, lineHeight: 15 },
   dock: {
     paddingHorizontal: space.gutter,
     paddingTop: space.s3,

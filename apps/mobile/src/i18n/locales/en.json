@@ -193,7 +193,8 @@
   "send": {
     "title": "Withdraw USDC",
     "network": "Stellar network",
-    "amount": "Amount to send",
+    "amount": "Amount to withdraw",
+    "reminder": "USDC · Stellar network only",
     "available": "available",
     "more": "More than your balance",
     "selectAddr": "Select recipient address",

@@ -193,7 +193,8 @@
   "send": {
     "title": "USDC Çek",
     "network": "Stellar ağı",
-    "amount": "Gönderilecek tutar",
+    "amount": "Çekilecek tutar",
+    "reminder": "Yalnızca USDC · Stellar ağı",
     "available": "çekilebilir",
     "more": "Bakiyeden fazla",
     "selectAddr": "Alıcı adresi seç",
