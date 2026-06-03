@@ -42,7 +42,7 @@ export function Sheet({ visible, onClose, title, children, dock }: SheetProps) {
         <View
           style={[
             styles.sheet,
-            { paddingBottom: space.s4 + insets.bottom + BLEED, marginBottom: -BLEED },
+            { paddingBottom: space.s2 + insets.bottom + BLEED, marginBottom: -BLEED },
           ]}
         >
           <View style={styles.grab} />
@@ -92,6 +92,6 @@ const styles = StyleSheet.create({
   },
   title: { ...type.h2, fontSize: 19, color: color.ink, marginBottom: space.s2 },
   body: { flexGrow: 0 },
-  bodyContent: { paddingBottom: space.s3 },
+  bodyContent: { paddingBottom: 0 },
   dock: { paddingTop: space.s3, borderTopWidth: 1, borderColor: color.hairSoft, gap: space.s3 },
 });

@@ -112,8 +112,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    marginTop: space.s2,
-    marginBottom: space.s4,
+    marginTop: space.s4,
   },
   noteText: { ...type.micro, color: color.inkFaint },
 });
