@@ -132,7 +132,9 @@
     "youGet": "Aldığınız",
     "simulate": "Ödemeyi simüle et (demo)",
     "powered": "Mercuryo ile",
-    "footer": "iframe · widget.mercuryo.io"
+    "footer": "iframe · widget.mercuryo.io",
+    "loading": "Mercuryo yükleniyor…",
+    "fallback": "Mercuryo widget'ı burada henüz yüklenemedi — sandbox erişimi (widget id + IP izni) gerekiyor. Akışı denemek için aşağıdaki demo düğmesini kullanın."
   },
   "order": {
     "title": "Siparişiniz",

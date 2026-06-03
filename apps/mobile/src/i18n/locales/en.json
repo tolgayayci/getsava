@@ -132,7 +132,9 @@
     "youGet": "You get",
     "simulate": "Simulate payment (demo)",
     "powered": "Powered by Mercuryo",
-    "footer": "iframe · widget.mercuryo.io"
+    "footer": "iframe · widget.mercuryo.io",
+    "loading": "Loading Mercuryo…",
+    "fallback": "The Mercuryo widget couldn't load here yet — it needs your sandbox access (widget id + IP allowlist). Use the demo button below to test the flow."
   },
   "order": {
     "title": "Your order",
