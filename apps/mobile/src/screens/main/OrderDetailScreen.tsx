@@ -6,6 +6,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type DepositState, type OrderStatus, stubBackendClient } from '../../backend/client';
 import { formatLira, formatUsdc, useTranslation } from '../../i18n';
+import { FX_TRY_PER_USDC } from '../../lib/fx';
 import { NETWORK } from '../../lib/network';
 import { useNav } from '../../nav';
 import { Button, CopyRow, Icon, NavHeader, Notice } from '../../ui';
@@ -79,7 +80,6 @@ export function OrderDetailScreen() {
     { key: 'arrived', label: t('order.stepArrived') },
   ];
   const stepStatus = (key: string): 'done' | 'active' | 'pending' => {
-    if (phase === 'arrived') return 'done';
     if (key === 'paid') return 'done';
     if (key === 'settling') return 'active';
     return 'pending';
@@ -104,14 +104,14 @@ export function OrderDetailScreen() {
             {phase === 'arrived' ? <Icon name="check" size={34} stroke={color.green} /> : null}
             {phase === 'failed' ? <Icon name="x" size={34} stroke={color.red} /> : null}
           </View>
-          <Text style={styles.statusTitle}>{hero.title}</Text>
           {settled ? (
             <Text style={styles.received}>+{formatUsdc(expectedUsdc, locale)}</Text>
           ) : null}
+          <Text style={styles.statusTitle}>{hero.title}</Text>
           <Text style={styles.statusBody}>{hero.body}</Text>
         </View>
 
-        {phase !== 'failed' ? (
+        {phase === 'settling' ? (
           <View style={styles.track}>
             {steps.map((step, i) => {
               const st = stepStatus(step.key);
@@ -146,39 +146,40 @@ export function OrderDetailScreen() {
               );
             })}
           </View>
-        ) : (
+        ) : null}
+
+        {phase === 'failed' ? (
           <Notice
             tone="red"
             icon="alert"
             title={t('order.failedTitle')}
             body={t('order.failedBody')}
           />
-        )}
+        ) : null}
 
-        <View style={styles.sec}>
-          <Text style={styles.secLabel}>{t('order.summary')}</Text>
-        </View>
+        <Text style={styles.secLabel}>{t('order.summary')}</Text>
         <View style={styles.sum}>
           <SumRow k={t('order.amount')} v={formatLira(amountTry, locale)} />
           <SumRow
             k={settled ? t('order.receive') : t('order.receiveEst')}
             v={`${settled ? '' : '≈ '}${formatUsdc(expectedUsdc, locale)}`}
+            accent={settled}
           />
+          <SumRow k={t('order.rate')} v={`1 USDC ≈ ${formatLira(FX_TRY_PER_USDC, locale)}`} />
+          <SumRow k={t('order.network')} v={t('receive.netValue')} />
           <SumRow k={t('order.savaRef')} v={orderId.slice(0, 8)} mono last />
         </View>
 
         {settled && hash ? (
           <>
-            <View style={styles.sec}>
-              <Text style={styles.secLabel}>{t('order.tx')}</Text>
-            </View>
+            <Text style={styles.secLabel}>{t('order.tx')}</Text>
             <CopyRow
               label={t('order.tx')}
-              value={`${hash.slice(0, 6)}…${hash.slice(-6)}`}
+              value={`${hash.slice(0, 8)}…${hash.slice(-8)}`}
               copyValue={hash}
               onCopy={() => nav.toast(t('common.copied'))}
             />
-            <View style={{ marginTop: space.s3 }}>
+            <View style={styles.txBtn}>
               <Button
                 variant="ghost"
                 iconName="external"
@@ -220,11 +221,23 @@ export function OrderDetailScreen() {
   );
 }
 
-function SumRow({ k, v, mono, last }: { k: string; v: string; mono?: boolean; last?: boolean }) {
+function SumRow({
+  k,
+  v,
+  mono,
+  last,
+  accent,
+}: {
+  k: string;
+  v: string;
+  mono?: boolean;
+  last?: boolean;
+  accent?: boolean;
+}) {
   return (
     <View style={[styles.sr, !last && styles.srBorder]}>
       <Text style={styles.srK}>{k}</Text>
-      <Text style={[styles.srV, mono && styles.srMono]}>{v}</Text>
+      <Text style={[styles.srV, mono && styles.srMono, accent && styles.srAccent]}>{v}</Text>
     </View>
   );
 }
@@ -232,7 +245,7 @@ function SumRow({ k, v, mono, last }: { k: string; v: string; mono?: boolean; la
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
   body: { paddingHorizontal: space.gutter },
-  statusHero: { alignItems: 'center', paddingTop: space.s6, paddingBottom: space.s4 },
+  statusHero: { alignItems: 'center', paddingTop: space.s6, paddingBottom: space.s5 },
   statusIcon: {
     width: 72,
     height: 72,
@@ -244,22 +257,22 @@ const styles = StyleSheet.create({
   },
   statusIconOk: { backgroundColor: color.greenSoft },
   statusIconBad: { backgroundColor: color.redSoft },
-  statusTitle: { ...type.h2, fontSize: 22, color: color.ink, textAlign: 'center' },
   received: {
     fontFamily: font.extraBold,
-    fontSize: 30,
+    fontSize: 38,
     color: color.green,
-    letterSpacing: -0.5,
-    marginTop: space.s3,
+    letterSpacing: -1,
+    marginBottom: space.s2,
   },
+  statusTitle: { ...type.h2, fontSize: 21, color: color.ink, textAlign: 'center' },
   statusBody: {
     ...type.body,
     color: color.inkDim,
     textAlign: 'center',
     marginTop: space.s2,
-    maxWidth: 280,
+    maxWidth: 290,
   },
-  track: { paddingLeft: space.s2, marginTop: space.s2 },
+  track: { paddingLeft: space.s2, marginTop: space.s2, marginBottom: space.s2 },
   tstep: { flexDirection: 'row', gap: space.s4 },
   dotCol: { alignItems: 'center' },
   tdot: {
@@ -281,12 +294,13 @@ const styles = StyleSheet.create({
   tlabel: { ...type.bodyStrong, fontSize: 15, color: color.ink },
   tlabelPending: { color: color.inkFaint },
   tsub: { ...type.caption, color: color.inkFaint },
-  sec: { marginTop: space.s5, marginBottom: space.s3 },
   secLabel: {
     ...type.label,
     letterSpacing: 1.4,
     textTransform: 'uppercase',
     color: color.inkFaint,
+    marginTop: space.s5,
+    marginBottom: space.s3,
   },
   sum: {
     backgroundColor: color.surface,
@@ -299,12 +313,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: space.s3,
+    paddingVertical: 13,
+    gap: space.s4,
   },
   srBorder: { borderBottomWidth: 1, borderBottomColor: color.hairSoft },
-  srK: { ...type.caption, color: color.inkDim },
-  srV: { ...type.bodyStrong, fontSize: 13.5, color: color.ink },
-  srMono: { fontFamily: font.mono },
+  srK: { ...type.body, color: color.inkDim },
+  srV: { ...type.bodyStrong, fontSize: 14, color: color.ink, textAlign: 'right', flexShrink: 1 },
+  srMono: { fontFamily: font.mono, fontSize: 13 },
+  srAccent: { color: color.green },
+  txBtn: { marginTop: space.s3 },
   dock: {
     paddingHorizontal: space.gutter,
     paddingTop: space.s3,

@@ -8,9 +8,10 @@ import { useSignRawHash } from '../../auth/privy-hooks';
 import { stubBackendClient } from '../../backend/client';
 import { formatLira, formatUsdc, useTranslation } from '../../i18n';
 import { bridgeEnabled, deliverDeposit } from '../../lib/bridge';
+import { FX_TRY_PER_USDC } from '../../lib/fx';
 import { buildMercuryoPreviewUrl, mercuryoConfigured } from '../../lib/mercuryo';
 import { useNav } from '../../nav';
-import { Button, Icon, NavHeader } from '../../ui';
+import { AppleMark, Button, GoogleMark, Icon, NavHeader } from '../../ui';
 
 function shortAddr(a: string): string {
   return a.length > 16 ? `${a.slice(0, 8)}…${a.slice(-6)}` : a;
@@ -20,7 +21,7 @@ function shortAddr(a: string): string {
  * Mercuryo payment step.
  *
  * Real widget (EXPO_PUBLIC_MERCURYO_WIDGET_ID set): a WebView loads Mercuryo's
- * hosted widget. Otherwise — the D2 demo — a mock card-checkout screen, clearly
+ * hosted widget. Otherwise — the D2 demo — a hosted-checkout-style mock, clearly
  * marked TEST MODE. Either way "Pay" runs the testnet bridge (treasury buys USDC
  * with XLM on the DEX → user) so the deposit arrives on-chain with a real hash.
  */
@@ -118,37 +119,67 @@ export function MercuryoScreen() {
     );
   }
 
-  // ---- Mock card checkout (D2 demo) ----
+  // ---- Mock hosted checkout (D2 demo) ----
   return (
     <>
       <NavHeader title={t('mercuryo.title')} subtitle="Mercuryo" center onBack={nav.back} />
+      <View style={styles.secureStrip}>
+        <Icon name="locksmall" size={12} stroke={color.green} />
+        <Text style={styles.secureStripText}>{t('mercuryo.secureCheckout')} · Mercuryo</Text>
+      </View>
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         <View style={styles.testBanner}>
           <Icon name="info" size={15} stroke={color.amber} />
           <Text style={styles.testBannerText}>{t('mercuryo.testMode')}</Text>
         </View>
 
+        {/* what you're buying */}
         <View style={styles.summary}>
-          <Text style={styles.sumLabel}>{t('mercuryo.youPay')}</Text>
-          <Text style={styles.sumAmount}>{formatLira(amountTry, locale)}</Text>
-          <View style={styles.sumDivider} />
-          <View style={styles.sumRow}>
-            <Text style={styles.sumK}>{t('mercuryo.youGet')}</Text>
-            <Text style={styles.sumVGreen}>≈ {formatUsdc(Number(expectedUsdc), locale)}</Text>
+          <Text style={styles.sumLabel}>{t('mercuryo.youGet')}</Text>
+          <Text style={styles.sumAmount}>≈ {formatUsdc(Number(expectedUsdc), locale)}</Text>
+          <Text style={styles.sumSub}>
+            {t('mercuryo.forLabel')} {formatLira(amountTry, locale)}
+          </Text>
+        </View>
+
+        {/* meta */}
+        <View style={styles.metaCard}>
+          <View style={styles.metaRow}>
+            <Text style={styles.metaK}>{t('mercuryo.rate')}</Text>
+            <Text style={styles.metaV}>1 USDC ≈ {formatLira(FX_TRY_PER_USDC, locale)}</Text>
           </View>
-          <View style={styles.sumRow}>
-            <Text style={styles.sumK}>{t('mercuryo.toWallet')}</Text>
-            <Text style={styles.sumVMono}>{shortAddr(address)}</Text>
+          <View style={[styles.metaRow, styles.metaRowLast]}>
+            <Text style={styles.metaK}>{t('mercuryo.toWallet')}</Text>
+            <Text style={styles.metaVMono}>{shortAddr(address)}</Text>
           </View>
         </View>
 
-        <Text style={styles.formLabel}>{t('mercuryo.testCard')}</Text>
+        {/* payment method */}
+        <Text style={styles.formLabel}>{t('mercuryo.payWith')}</Text>
+        <View style={styles.methods}>
+          <View style={[styles.method, styles.methodActive]}>
+            <Icon name="card" size={20} stroke={color.purple} />
+            <Text style={[styles.methodText, styles.methodTextActive]}>{t('mercuryo.card')}</Text>
+          </View>
+          <View style={[styles.method, styles.methodDim]}>
+            <AppleMark size={18} fill={color.inkDim} />
+            <Text style={styles.methodText}>Apple Pay</Text>
+          </View>
+          <View style={[styles.method, styles.methodDim]}>
+            <GoogleMark size={16} />
+            <Text style={styles.methodText}>Google Pay</Text>
+          </View>
+        </View>
+
+        {/* card form */}
         <View style={styles.formCard}>
           <View style={styles.field}>
             <Text style={styles.fieldKey}>{t('mercuryo.cardNumber')}</Text>
             <View style={styles.fieldRow}>
               <Text style={styles.fieldVal}>4444 4444 4444 3333</Text>
-              <Icon name="card" size={20} stroke={color.inkDim} />
+              <View style={styles.brandChip}>
+                <Text style={styles.brandText}>VISA</Text>
+              </View>
             </View>
           </View>
           <View style={styles.fieldSplit}>
@@ -194,6 +225,18 @@ const styles = StyleSheet.create({
   },
   loadingText: { ...type.caption, color: color.inkDim },
 
+  secureStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    backgroundColor: color.bg2,
+    borderBottomWidth: 1,
+    borderBottomColor: color.hairSoft,
+  },
+  secureStripText: { ...type.caption, color: color.inkDim, fontFamily: font.semiBold },
+
   testBanner: {
     flexDirection: 'row',
     gap: 9,
@@ -203,6 +246,7 @@ const styles = StyleSheet.create({
     borderColor: color.amberBd,
     borderRadius: radius.md,
     padding: space.s3,
+    marginTop: space.s2,
   },
   testBannerText: { ...type.caption, color: color.amber, flex: 1, lineHeight: 17 },
 
@@ -216,27 +260,32 @@ const styles = StyleSheet.create({
   sumAmount: {
     fontFamily: font.extraBold,
     fontSize: 40,
-    color: color.ink,
+    color: color.green,
     marginTop: space.s2,
     letterSpacing: -1,
   },
-  sumDivider: {
-    height: 1,
-    alignSelf: 'stretch',
-    backgroundColor: color.hairSoft,
+  sumSub: { ...type.body, color: color.inkDim, marginTop: space.s2 },
+
+  metaCard: {
     marginTop: space.s5,
-    marginBottom: space.s1,
+    backgroundColor: color.surface,
+    borderWidth: 1,
+    borderColor: color.hair,
+    borderRadius: radius.md,
+    paddingHorizontal: space.s4,
   },
-  sumRow: {
+  metaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    alignSelf: 'stretch',
-    paddingVertical: space.s3,
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: color.hairSoft,
   },
-  sumK: { ...type.body, color: color.inkDim },
-  sumVGreen: { ...type.bodyStrong, fontSize: 15, color: color.green },
-  sumVMono: { fontFamily: font.mono, fontSize: 13, color: color.ink },
+  metaRowLast: { borderBottomWidth: 0 },
+  metaK: { ...type.body, color: color.inkDim },
+  metaV: { ...type.bodyStrong, fontSize: 14, color: color.ink },
+  metaVMono: { fontFamily: font.mono, fontSize: 13, color: color.ink },
 
   formLabel: {
     ...type.label,
@@ -246,6 +295,23 @@ const styles = StyleSheet.create({
     marginTop: space.s6,
     marginBottom: space.s3,
   },
+  methods: { flexDirection: 'row', gap: 8, marginBottom: space.s4 },
+  method: {
+    flex: 1,
+    height: 56,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: color.hair,
+    backgroundColor: color.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  methodActive: { borderColor: color.purple, backgroundColor: color.purpleSoft },
+  methodDim: { opacity: 0.5 },
+  methodText: { ...type.micro, color: color.inkDim, fontFamily: font.semiBold },
+  methodTextActive: { color: color.ink },
+
   formCard: {
     backgroundColor: color.surface,
     borderWidth: 1,
@@ -264,6 +330,13 @@ const styles = StyleSheet.create({
   },
   fieldRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   fieldVal: { fontFamily: font.mono, fontSize: 15, color: color.ink, letterSpacing: 1 },
+  brandChip: {
+    backgroundColor: color.surface2,
+    borderRadius: 4,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+  },
+  brandText: { fontFamily: font.bold, fontSize: 10, letterSpacing: 1, color: color.inkDim },
   fieldSplit: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: color.hairSoft },
   fieldHalf: { flex: 1, paddingVertical: 14 },
   fieldHalfRight: { borderLeftWidth: 1, borderLeftColor: color.hairSoft, paddingLeft: space.s4 },
