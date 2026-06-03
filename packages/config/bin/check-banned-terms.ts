@@ -29,6 +29,14 @@ const DISCLAIMER_NAMESPACES = new Set([
   'circuitBreaker',
 ]);
 
+/**
+ * Namespaces where the English word "deposit" is allowed — it's the product's
+ * label for moving crypto in/out of the wallet (Deposit/Withdraw USDC), an
+ * industry-standard transactional term, NOT a banking claim. The Turkish
+ * banking term "mevduat" stays banned everywhere.
+ */
+const DEPOSIT_OK_NAMESPACES = new Set(['addFunds', 'receive', 'send']);
+
 const ALL_TERMS = BANNED_MARKETING_TERMS.map((t) => t.term);
 
 interface Hit {
@@ -44,7 +52,11 @@ function scanLocaleTree(file: string, tree: unknown): Hit[] {
   const visit = (node: unknown, path: string[]): void => {
     if (typeof node === 'string') {
       const namespace = path[0] ?? '';
-      const allowlist = DISCLAIMER_NAMESPACES.has(namespace) ? ALL_TERMS : [];
+      const allowlist = DISCLAIMER_NAMESPACES.has(namespace)
+        ? ALL_TERMS
+        : DEPOSIT_OK_NAMESPACES.has(namespace)
+          ? ['deposit']
+          : [];
       for (const hit of scanForBannedTerms(node, { allowlist })) {
         hits.push({ file, keyPath: path.join('.'), term: hit.term, excerpt: hit.excerpt });
       }

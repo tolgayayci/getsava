@@ -107,9 +107,9 @@
     "cardTitle": "Pay with card",
     "cardTag": "Lira → USDC",
     "cardDesc": "Buy USDC with your bank card via Mercuryo",
-    "recvTitle": "Receive USDC",
+    "recvTitle": "Deposit USDC",
     "recvTag": "Stellar",
-    "recvDesc": "Receive USDC from another Stellar wallet"
+    "recvDesc": "Deposit USDC from another Stellar wallet"
   },
   "addLira": {
     "title": "Pay with card",
@@ -163,7 +163,7 @@
     "supplyNow": "Supply it & earn"
   },
   "receive": {
-    "title": "Receive USDC",
+    "title": "Deposit USDC",
     "warnTitle": "Before you continue",
     "warnLead": "You'll receive USDC into your own Stellar wallet. These transfers are final, so please confirm the details below.",
     "w1Title": "USDC only",
