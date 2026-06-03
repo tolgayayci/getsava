@@ -58,6 +58,14 @@ export function MercuryoScreen() {
             domStorageEnabled
             startInLoadingState
             onError={() => setFailed(true)}
+            onHttpError={(e) => {
+              // Main-frame HTTP error (e.g. sandbox 403 when the IP isn't
+              // allow-listed) → show the clean fallback, not Mercuryo's raw page.
+              const { statusCode, url } = e.nativeEvent;
+              if (statusCode >= 400 && /mrcr\.io|mercuryo/.test(url)) {
+                setFailed(true);
+              }
+            }}
             renderLoading={() => (
               <View style={styles.loading}>
                 <ActivityIndicator color={color.purple} />
