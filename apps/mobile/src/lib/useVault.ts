@@ -84,6 +84,7 @@ export function useVault(): UseVault {
   const netPrincipal = useVaultStore((s) => s.netPrincipalUsdc);
   const addSupply = useVaultStore((s) => s.addSupply);
   const addWithdraw = useVaultStore((s) => s.addWithdraw);
+  const recordRate = useVaultStore((s) => s.recordRate);
 
   const [snap, setSnap] = useState<ReserveSnapshot | null>(null);
   const [pos, setPos] = useState<UserPosition | null>(null);
@@ -99,14 +100,16 @@ export function useVault(): UseVault {
     try {
       const cfg = blendConfig(NETWORK);
       const pool = await loadPool(cfg);
-      setSnap(readReserveSnapshot(pool, cfg.usdcSac));
+      const snapshot = readReserveSnapshot(pool, cfg.usdcSac);
+      setSnap(snapshot);
+      recordRate(snapshot.supplyApy * 100, Date.now());
       setPos(await readUserPosition(pool, address, cfg.usdcSac));
     } catch {
       setError(true);
     } finally {
       setLoading(false);
     }
-  }, [address]);
+  }, [address, recordRate]);
 
   useEffect(() => {
     void refresh();

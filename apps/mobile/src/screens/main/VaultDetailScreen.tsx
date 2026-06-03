@@ -1,12 +1,18 @@
-import { color, font, space, type } from '@getsava/ui';
+import { color, font, radius, space, type } from '@getsava/ui';
 import * as WebBrowser from 'expo-web-browser';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatPct, useTranslation } from '../../i18n';
 import { NETWORK } from '../../lib/network';
-import { buildRateSeries, type Timeframe } from '../../lib/rate-series';
+import {
+  buildSeriesFromHistory,
+  type ChartPoint,
+  hasRealHistory,
+  type Timeframe,
+} from '../../lib/rate-series';
 import { useVault } from '../../lib/useVault';
+import { useVaultStore } from '../../lib/vault-store';
 import { useNav } from '../../nav';
 import { Button, Icon, NavHeader, Notice, UsdcMark } from '../../ui';
 import {
@@ -50,10 +56,15 @@ export function VaultDetailScreen() {
   const insets = useSafeAreaInsets();
   const { vault } = useVault();
 
+  const history = useVaultStore((s) => s.rateHistory);
   const [learnOpen, setLearnOpen] = useState(false);
   const [tf, setTf] = useState<Timeframe>('1M');
+  const [scrubPoint, setScrubPoint] = useState<ChartPoint | null>(null);
   const apy = vault?.apy ?? 0;
-  const series = useMemo(() => buildRateSeries(tf, apy, Date.now()), [tf, apy]);
+  const series = useMemo(
+    () => buildSeriesFromHistory(history, tf, apy, Date.now()),
+    [history, tf, apy],
+  );
 
   if (vault === null) {
     return (
@@ -65,6 +76,12 @@ export function VaultDetailScreen() {
       </>
     );
   }
+
+  const shownApy = scrubPoint ? scrubPoint.v : vault.apy;
+  const startV = series[0]?.v ?? vault.apy;
+  const delta = shownApy - startV;
+  const up = delta >= 0;
+  const real = hasRealHistory(history, tf, Date.now());
 
   return (
     <>
@@ -86,22 +103,40 @@ export function VaultDetailScreen() {
           <StatusPill status={vault.status} />
         </View>
 
-        {/* Supply APY hero */}
+        {/* Supply APY hero — Midas-style, top-left, updates while scrubbing */}
         <View style={styles.hero}>
           <Text style={styles.heroLabel}>{t('vault.supplyApy')}</Text>
-          <Text style={styles.heroRate}>{formatPct(vault.apy, locale)}</Text>
-          <View style={styles.heroQual}>
-            <Icon name="info" size={12} stroke={color.amber} />
-            <Text style={styles.heroQualText}>{t('risk.variableFull')}</Text>
+          <View style={styles.heroRow}>
+            <Text style={styles.heroRate}>{formatPct(shownApy, locale)}</Text>
+            <View style={[styles.changeChip, up ? styles.changeUp : styles.changeDown]}>
+              <Icon
+                name={up ? 'arrowUp' : 'arrowDown'}
+                size={12}
+                stroke={up ? color.green : color.red}
+              />
+              <Text style={[styles.changeText, { color: up ? color.green : color.red }]}>
+                {formatPct(Math.abs(delta), locale)}
+              </Text>
+            </View>
           </View>
+          {scrubPoint ? (
+            <Text style={styles.heroSubDate}>{formatTick(scrubPoint.t, tf, locale)}</Text>
+          ) : (
+            <View style={styles.heroQual}>
+              <Icon name="info" size={12} stroke={color.amber} />
+              <Text style={styles.heroQualText}>{t('risk.variableFull')}</Text>
+            </View>
+          )}
         </View>
 
-        {/* Interactive rate chart — full-bleed, drag to scrub */}
+        {/* Interactive rate chart — full-bleed, touch anywhere to scrub */}
         <View style={styles.chartBleed}>
-          <RateChart data={series} formatTime={(ts) => formatTick(ts, tf, locale)} />
+          <RateChart data={series} onScrub={setScrubPoint} />
         </View>
-        <TimeframeTabs value={tf} onChange={setTf} />
-        <Text style={styles.chartNote}>{t('chart.illustrative')}</Text>
+        <View style={styles.chartFooter}>
+          <TimeframeTabs value={tf} onChange={setTf} />
+          {real ? null : <Text style={styles.chartNote}>{t('chart.building')}</Text>}
+        </View>
 
         {/* APY composition */}
         <BreakdownBar basePct={vault.apy} rewardsPct={0} />
@@ -200,29 +235,41 @@ const styles = StyleSheet.create({
   name: { ...type.h2, fontSize: 20, color: color.ink },
   vetted: { flexDirection: 'row', alignItems: 'center', gap: space.s1, marginTop: 3 },
   vettedText: { ...type.caption, color: color.inkDim },
-  hero: { alignItems: 'center', paddingTop: space.s5, paddingBottom: space.s4 },
+  hero: { alignItems: 'flex-start', paddingTop: space.s4, paddingBottom: space.s4 },
   heroLabel: {
     ...type.label,
-    letterSpacing: 1.4,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
     color: color.inkFaint,
   },
+  heroRow: { flexDirection: 'row', alignItems: 'center', gap: space.s3, marginTop: 4 },
   heroRate: {
     fontFamily: font.extraBold,
-    fontSize: 52,
+    fontSize: 40,
     color: color.green,
-    letterSpacing: -1.5,
-    marginTop: space.s2,
+    letterSpacing: -1,
   },
+  changeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: radius.sm,
+  },
+  changeUp: { backgroundColor: color.greenSoft },
+  changeDown: { backgroundColor: color.redSoft },
+  changeText: { fontFamily: font.bold, fontSize: 13 },
   heroQual: { flexDirection: 'row', alignItems: 'center', gap: space.s1, marginTop: space.s2 },
   heroQualText: { ...type.caption, color: color.amber },
+  heroSubDate: { ...type.caption, color: color.inkDim, marginTop: space.s2 },
   chartBleed: { marginHorizontal: -space.gutter },
+  chartFooter: { marginBottom: space.s5 },
   chartNote: {
     ...type.caption,
     color: color.inkFaint,
     textAlign: 'center',
-    marginTop: space.s3,
-    marginBottom: space.s5,
+    marginTop: space.s2,
   },
   bdNote: {
     ...type.caption,

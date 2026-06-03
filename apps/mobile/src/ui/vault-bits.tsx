@@ -49,9 +49,9 @@ export function StatusPill({ status }: { status: number }) {
   );
 }
 
-const CHART_H = 200;
-const PAD_TOP = 22; // headroom for the floating value pill
-const PAD_BOTTOM = 8;
+const CHART_H = 210;
+const PAD_TOP = 14;
+const PAD_BOTTOM = 10;
 
 /** Catmull-Rom → cubic-bezier smoothing for a soft, trading-app line. */
 function smoothPath(pts: ReadonlyArray<readonly [number, number]>): string {
@@ -76,43 +76,55 @@ function smoothPath(pts: ReadonlyArray<readonly [number, number]>): string {
 }
 
 /**
- * Full-width interactive APY chart (Midas/Robinhood-style): smooth area+line with
- * a touch-drag crosshair + value pill. Green when the window rises, red when it
- * falls. Width is measured via onLayout so touch x maps 1:1 to a data point.
+ * Full-width interactive APY chart (Midas/Robinhood-style): smooth area+line. Touch
+ * anywhere and slide — the whole chart captures the gesture, so a crosshair + dot
+ * flow under the finger and `onScrub` reports the point (the screen's hero is the
+ * readout). Green when the window rises, red when it falls.
  */
 export function RateChart({
   data,
   height = CHART_H,
-  formatTime,
+  onScrub,
 }: {
   data: ChartPoint[];
   height?: number;
-  formatTime?: (t: number) => string;
+  onScrub?: (p: ChartPoint | null) => void;
 }) {
-  const { locale } = useTranslation();
   const [w, setW] = useState(0);
   const [scrub, setScrub] = useState<number | null>(null);
 
   const wRef = useRef(0);
-  const nRef = useRef(data.length);
-  nRef.current = data.length;
+  const dataRef = useRef(data);
+  dataRef.current = data;
+  const onScrubRef = useRef(onScrub);
+  onScrubRef.current = onScrub;
 
-  function onTouch(e: GestureResponderEvent) {
+  function pick(e: GestureResponderEvent) {
     const width = wRef.current || 1;
-    const n = nRef.current;
-    const x = e.nativeEvent.locationX;
-    setScrub(Math.max(0, Math.min(n - 1, Math.round((x / width) * (n - 1)))));
+    const d = dataRef.current;
+    const n = d.length;
+    const i = Math.max(0, Math.min(n - 1, Math.round((e.nativeEvent.locationX / width) * (n - 1))));
+    setScrub(i);
+    onScrubRef.current?.(d[i] ?? null);
+  }
+  function end() {
+    setScrub(null);
+    onScrubRef.current?.(null);
   }
 
   const panRef = useRef<ReturnType<typeof PanResponder.create> | null>(null);
   if (panRef.current === null) {
     panRef.current = PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dx) > 6 && Math.abs(g.dx) > Math.abs(g.dy),
-      onPanResponderGrant: onTouch,
-      onPanResponderMove: onTouch,
-      onPanResponderRelease: () => setScrub(null),
-      onPanResponderTerminate: () => setScrub(null),
+      // Capture the gesture immediately so a touch anywhere on the chart scrubs and
+      // keeps following — the user never has to land on the line itself.
+      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderGrant: pick,
+      onPanResponderMove: pick,
+      onPanResponderRelease: end,
+      onPanResponderTerminate: end,
     });
   }
 
@@ -129,10 +141,14 @@ export function RateChart({
   const values = data.map((d) => d.v);
   const min = Math.min(...values);
   const max = Math.max(...values);
-  const sp = max - min || 1;
+  const sp = max - min || Math.max(min, 1);
+  // Pad the vertical range so a stable (near-flat) rate sits mid-box, not glued to an edge.
+  const lo = min - sp * 0.25;
+  const hi = max + sp * 0.25;
+  const range = hi - lo || 1;
   const innerH = height - PAD_TOP - PAD_BOTTOM;
   const xAt = (i: number) => (i / (n - 1)) * w;
-  const yAt = (v: number) => PAD_TOP + (1 - (v - min) / sp) * innerH;
+  const yAt = (v: number) => PAD_TOP + (1 - (v - lo) / range) * innerH;
   const pts = data.map((d, i) => [xAt(i), yAt(d.v)] as const);
 
   const rising = (data[n - 1]?.v ?? 0) >= (data[0]?.v ?? 0);
@@ -141,12 +157,7 @@ export function RateChart({
   const baseY = (height - PAD_BOTTOM).toFixed(1);
   const area = `${line} L${xAt(n - 1).toFixed(1)} ${baseY} L0 ${baseY} Z`;
   const lastPt = pts[n - 1] ?? ([0, 0] as const);
-
-  const sIdx = scrub ?? n - 1;
-  const sPt = pts[sIdx] ?? lastPt;
-  const sVal = data[sIdx]?.v ?? 0;
-  const pillW = 92;
-  const pillLeft = Math.max(0, Math.min(w - pillW, sPt[0] - pillW / 2));
+  const sPt = pts[scrub ?? n - 1] ?? lastPt;
 
   return (
     <View style={{ height }} onLayout={onLayout} {...panRef.current.panHandlers}>
@@ -162,7 +173,7 @@ export function RateChart({
           d={line}
           fill="none"
           stroke={tint}
-          strokeWidth={2.2}
+          strokeWidth={2.4}
           strokeLinejoin="round"
           strokeLinecap="round"
         />
@@ -175,26 +186,18 @@ export function RateChart({
           <>
             <Line
               x1={sPt[0]}
-              y1={PAD_TOP - 6}
+              y1={0}
               x2={sPt[0]}
-              y2={height - PAD_BOTTOM}
-              stroke={color.hair}
+              y2={height}
+              stroke={color.inkFaint}
               strokeWidth={1}
               strokeDasharray="3 4"
             />
-            <Circle cx={sPt[0]} cy={sPt[1]} r={9} fill={tint} fillOpacity={0.18} />
-            <Circle cx={sPt[0]} cy={sPt[1]} r={5} fill={tint} stroke={color.bg} strokeWidth={2} />
+            <Circle cx={sPt[0]} cy={sPt[1]} r={10} fill={tint} fillOpacity={0.18} />
+            <Circle cx={sPt[0]} cy={sPt[1]} r={5.5} fill={tint} stroke={color.bg} strokeWidth={2} />
           </>
         )}
       </Svg>
-      {scrub !== null ? (
-        <View style={[chartStyles.pill, { left: pillLeft, width: pillW }]} pointerEvents="none">
-          <Text style={chartStyles.pillVal}>{formatPct(sVal, locale)}</Text>
-          {formatTime ? (
-            <Text style={chartStyles.pillTime}>{formatTime(data[sIdx]?.t ?? 0)}</Text>
-          ) : null}
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -239,18 +242,6 @@ export function TimeframeTabs({
 }
 
 const chartStyles = StyleSheet.create({
-  pill: {
-    position: 'absolute',
-    top: 0,
-    alignItems: 'center',
-    backgroundColor: color.surface2,
-    borderRadius: radius.sm,
-    paddingVertical: 3,
-    borderWidth: 1,
-    borderColor: color.hair,
-  },
-  pillVal: { fontFamily: font.bold, fontSize: 13, color: color.ink },
-  pillTime: { fontFamily: font.regular, fontSize: 10, color: color.inkFaint, marginTop: 1 },
   tabs: { flexDirection: 'row', gap: 6, marginTop: space.s3 },
   tab: {
     flex: 1,

@@ -385,6 +385,6 @@
     "m1": "1M",
     "m3": "3M",
     "y1": "1Y",
-    "illustrative": "Illustrative — live rate history begins once recorded"
+    "building": "Recording live rate — history fills in over time"
   }
 }

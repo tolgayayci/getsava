@@ -16,6 +16,18 @@ export interface ActivityRecord {
   readonly ts: number;
 }
 
+/** A real APY observation, recorded each time the app reads the live pool rate. */
+export interface RateSample {
+  /** epoch ms */
+  readonly ts: number;
+  /** supply APY percent observed at that time */
+  readonly apy: number;
+}
+
+/** Don't record more than one sample per this interval (keeps the series sane). */
+const RATE_SAMPLE_INTERVAL_MS = 10 * 60_000;
+const RATE_HISTORY_CAP = 2000;
+
 interface VaultStoreState {
   /**
    * Off-chain principal tracking. The chain stores only bTokens, not cost basis,
@@ -23,9 +35,13 @@ interface VaultStoreState {
    */
   netPrincipalUsdc: number;
   activity: ActivityRecord[];
+  /** REAL observed APY history (the chart's source of truth; grows as it samples). */
+  rateHistory: RateSample[];
   addSupply: (usdc: number, tryAtTx: number, hash: string, ts: number) => void;
   addWithdraw: (usdc: number, tryAtTx: number, hash: string, ts: number, full: boolean) => void;
   addRecord: (rec: ActivityRecord) => void;
+  /** Append a real APY sample (throttled + capped). */
+  recordRate: (apy: number, ts: number) => void;
   reset: () => void;
 }
 
@@ -35,6 +51,15 @@ export const useVaultStore = create<VaultStoreState>()(
     (set) => ({
       netPrincipalUsdc: 0,
       activity: [],
+      rateHistory: [],
+      recordRate: (apy, ts) =>
+        set((s) => {
+          const last = s.rateHistory[s.rateHistory.length - 1];
+          if (last && ts - last.ts < RATE_SAMPLE_INTERVAL_MS) {
+            return s;
+          }
+          return { rateHistory: [...s.rateHistory, { ts, apy }].slice(-RATE_HISTORY_CAP) };
+        }),
       addSupply: (usdc, tryAtTx, hash, ts) =>
         set((s) => ({
           netPrincipalUsdc: s.netPrincipalUsdc + usdc,
@@ -46,7 +71,7 @@ export const useVaultStore = create<VaultStoreState>()(
           activity: [{ id: hash, type: 'withdrew', usdc, tryAtTx, hash, ts }, ...s.activity],
         })),
       addRecord: (rec) => set((s) => ({ activity: [rec, ...s.activity] })),
-      reset: () => set({ netPrincipalUsdc: 0, activity: [] }),
+      reset: () => set({ netPrincipalUsdc: 0, activity: [], rateHistory: [] }),
     }),
     { name: 'sava-vault', storage: createJSONStorage(() => AsyncStorage) },
   ),
