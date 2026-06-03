@@ -1,6 +1,6 @@
 import { Keypair, Networks, Transaction } from '@stellar/stellar-base';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { buildUsdcPaymentXdr, sendUsdc } from './payment';
+import { buildUsdcPaymentXdr, sendUsdc, sendUsdcViaXlm } from './payment';
 
 const TREASURY = Keypair.fromSecret(
   // Throwaway fixed testnet secret — used only to make the test deterministic.
@@ -98,5 +98,34 @@ describe('buildUsdcPaymentXdr', () => {
     const xdr = buildUsdcPaymentXdr('testnet', SOURCE, '100', DEST, '1.0000000');
     const tx = new Transaction(xdr, Networks.TESTNET);
     expect(tx.memo.type).toBe('none');
+  });
+});
+
+describe('sendUsdcViaXlm', () => {
+  it('builds a path payment that spends XLM and delivers exact USDC', async () => {
+    const captured: { body?: string } = {};
+    mockHorizon(captured);
+
+    const res = await sendUsdcViaXlm({
+      network: 'testnet',
+      sourceSecret: TREASURY.secret(),
+      destination: DEST,
+      usdcAmount: '12.0000000',
+      sendMaxXlm: '240.0000000',
+      memo: 'deposit abc',
+    });
+
+    expect(res.hash).toBe('submitted_hash');
+    const tx = decodeSubmitted(captured.body ?? '');
+    // biome-ignore lint/suspicious/noExplicitAny: parsed operation is loosely typed
+    const op = tx.operations[0] as any;
+    expect(op.type).toBe('pathPaymentStrictReceive');
+    expect(op.sendAsset.isNative()).toBe(true);
+    expect(op.sendMax).toBe('240.0000000');
+    expect(op.destination).toBe(DEST);
+    expect(op.destAsset.code).toBe('USDC');
+    expect(op.destAsset.issuer).toBe(ISSUER);
+    expect(op.destAmount).toBe('12.0000000');
+    expect(tx.signatures.length).toBe(1);
   });
 });

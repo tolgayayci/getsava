@@ -67,6 +67,61 @@ function memoText(text: string): Memo {
   return Memo.text(text.slice(0, 28));
 }
 
+export interface SendUsdcViaXlmInput {
+  readonly network: Network;
+  /** Treasury source secret (S...). SERVER/BRIDGE-SIDE ONLY. */
+  readonly sourceSecret: string;
+  readonly destination: string;
+  /** Exact USDC the destination should receive, e.g. "12.5000000". */
+  readonly usdcAmount: string;
+  /** Max XLM the treasury will spend (path-payment ceiling). */
+  readonly sendMaxXlm: string;
+  readonly memo?: string;
+}
+
+/**
+ * Deliver USDC by buying it with XLM on the Stellar DEX in one atomic op
+ * (`pathPaymentStrictReceive`): the treasury spends up to `sendMaxXlm` of XLM and
+ * the destination receives EXACTLY `usdcAmount` of USDC. No pre-stocked USDC
+ * needed — funds the D2 deposit bridge straight from the treasury's XLM. The
+ * destination must already hold the USDC trustline.
+ */
+export async function sendUsdcViaXlm(input: SendUsdcViaXlmInput): Promise<SendUsdcResult> {
+  const cfg = networkConfig(input.network);
+  const keypair = Keypair.fromSecret(input.sourceSecret);
+  const source = keypair.publicKey();
+
+  const account = await fetchAccount(input.network, source);
+  if (account === null) {
+    throw new Error('Treasury source account not found on Horizon');
+  }
+
+  const usdc = new Asset(cfg.usdc.code, cfg.usdc.issuer);
+  const builder = new TransactionBuilder(new Account(source, account.sequence), {
+    // Higher fee — path payments can touch several DEX offers.
+    fee: '100000',
+    networkPassphrase: cfg.networkPassphrase,
+  }).addOperation(
+    Operation.pathPaymentStrictReceive({
+      sendAsset: Asset.native(),
+      sendMax: input.sendMaxXlm,
+      destination: input.destination,
+      destAsset: usdc,
+      destAmount: input.usdcAmount,
+      path: [],
+    }),
+  );
+
+  if (input.memo !== undefined && input.memo.length > 0) {
+    builder.addMemo(memoText(input.memo));
+  }
+
+  const tx = builder.setTimeout(DEFAULT_TIMEOUT_SECONDS).build();
+  tx.sign(keypair);
+  const hash = await submitTransaction(input.network, tx.toEnvelope().toXDR('base64'));
+  return { hash };
+}
+
 /**
  * Build the UNSIGNED USDC payment transaction for a user-controlled wallet (the
  * Send/Withdraw flow). The client hashes this, signs it via Privy raw-hash, and

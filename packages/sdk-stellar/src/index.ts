@@ -15,7 +15,9 @@ export {
   buildUsdcPaymentXdr,
   type SendUsdcInput,
   type SendUsdcResult,
+  type SendUsdcViaXlmInput,
   sendUsdc,
+  sendUsdcViaXlm,
 } from './payment';
 export {
   ensureUsdcTrustline,
