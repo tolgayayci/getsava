@@ -67,7 +67,12 @@ export function OnboardingGate({
         </View>
 
         <View style={styles.acks}>
-          <AckRow checked={a1} label={t('onboarding.ack1')} onToggle={() => setA1((v) => !v)} />
+          <AckRow
+            checked={a1}
+            label={t('onboarding.ack1')}
+            onToggle={() => setA1((v) => !v)}
+            divider
+          />
           <AckRow checked={a2} label={t('onboarding.ack2')} onToggle={() => setA2((v) => !v)} />
         </View>
 
@@ -98,20 +103,22 @@ function AckRow({
   checked,
   label,
   onToggle,
+  divider = false,
 }: {
   checked: boolean;
   label: string;
   onToggle: () => void;
+  divider?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="checkbox"
       accessibilityState={{ checked }}
       onPress={onToggle}
-      style={styles.ack}
+      style={[styles.ack, divider && styles.ackDivider]}
     >
       <View style={[styles.ackBox, checked && styles.ackBoxOn]}>
-        {checked && <Icon name="check" size={14} stroke={color.greenInk} />}
+        {checked && <Icon name="check" size={13} stroke={color.greenInk} />}
       </View>
       <Text style={styles.ackText}>{label}</Text>
     </Pressable>
@@ -123,7 +130,12 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: space.gutter, paddingBottom: space.s2 },
   wordmark: { ...type.title, fontSize: 19, color: color.ink },
   wordmarkV: { color: color.purple },
-  body: { paddingHorizontal: space.gutter, paddingBottom: space.s6 },
+  body: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: space.gutter,
+    paddingVertical: space.s5,
+  },
   eyebrow: {
     ...type.label,
     color: color.inkFaint,
@@ -156,19 +168,20 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     paddingHorizontal: space.s4,
   },
-  ack: { flexDirection: 'row', gap: space.s3, paddingVertical: space.s4, alignItems: 'flex-start' },
+  ack: { flexDirection: 'row', gap: space.s3, paddingVertical: space.s4, alignItems: 'center' },
+  ackDivider: { borderBottomWidth: 1, borderBottomColor: color.hairSoft },
   ackBox: {
-    width: 24,
-    height: 24,
-    borderRadius: 7,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.25)',
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: color.hair,
+    backgroundColor: color.surface2,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 1,
   },
   ackBoxOn: { backgroundColor: color.green, borderColor: color.green },
-  ackText: { ...type.caption, flex: 1, color: color.ink, lineHeight: 20 },
+  ackText: { ...type.body, fontSize: 14, flex: 1, color: color.ink, lineHeight: 20 },
   legalRow: { flexDirection: 'row', gap: space.s5, justifyContent: 'center', marginTop: space.s4 },
   legalLink: { ...type.caption, color: color.inkDim },
   dock: {
