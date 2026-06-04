@@ -3,6 +3,18 @@ main = "src/index.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Real bindings (Hyperdrive → Neon Postgres, secrets, staging + production
-# environments) are added in YK-487 (T1.D6.S2). This scaffold serves GET /health
-# only. Secrets are set via `wrangler secret put`, never committed.
+# Non-secret config. Secrets (SEP10_SERVER_SECRET, SEP10_JWT_SECRET,
+# MERCURYO_WIDGET_SECRET, MERCURYO_SIGN_KEY, PRIVY_VERIFICATION_KEY,
+# TREASURY_SECRET, DATABASE_URL) are set with `wrangler secret put` — never here.
+[vars]
+NETWORK = "testnet"
+HOME_DOMAIN = "getsava.app"
+WEB_AUTH_DOMAIN = "api.getsava.app"
+TRY_PER_USD = "40"
+BRIDGE_ENABLED = "false"
+
+# Production deploys to api.getsava.app (custom domain configured in the
+# Cloudflare dashboard / via routes). Postgres reaches Neon through Hyperdrive.
+[env.production.vars]
+NETWORK = "mainnet"
+BRIDGE_ENABLED = "false"

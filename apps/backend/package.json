@@ -9,16 +9,24 @@
     "deploy": "wrangler deploy",
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "sep10:sign": "tsx scripts/sep10-sign.ts",
+    "db:migrate": "psql \"$DATABASE_URL\" -f src/orders/schema.sql"
   },
   "dependencies": {
     "@getsava/sdk-mercuryo": "workspace:*",
     "@getsava/sdk-stellar": "workspace:*",
     "@getsava/types": "workspace:*",
-    "hono": "^4.12.23"
+    "@hono/swagger-ui": "^0.6.1",
+    "@hono/zod-openapi": "^1.4.0",
+    "@neondatabase/serverless": "^1.1.0",
+    "hono": "^4.12.23",
+    "jose": "^6.2.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260531.1",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.0",
     "vitest": "^4.1.7",
     "wrangler": "^4.95.0"

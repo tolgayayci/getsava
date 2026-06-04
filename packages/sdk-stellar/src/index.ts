@@ -26,6 +26,18 @@ export {
   type ProvisionResult,
 } from './provisioning';
 export {
+  accountIdFromSecret,
+  type BuildChallengeInput,
+  type BuiltChallenge,
+  buildChallengeTransaction,
+  ChallengeError,
+  generateKeypair,
+  isValidStellarAddress,
+  signChallengeWithSecret,
+  type VerifyChallengeInput,
+  verifyChallengeTransaction,
+} from './sep10';
+export {
   findUsdcSettlement,
   type SettlementMatch,
   stellarExpertTxUrl,

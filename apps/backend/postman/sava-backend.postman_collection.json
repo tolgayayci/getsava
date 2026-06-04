@@ -1,0 +1,164 @@
+{
+  "info": {
+    "name": "Sava Backend (D6)",
+    "_postman_id": "sava-backend-d6",
+    "description": "SEP-10 auth + Mercuryo URL signing for Sava.\n\nSetup:\n1. Start the API: `pnpm --filter @getsava/backend dev` (wrangler dev on :8787) with apps/backend/.dev.vars filled in.\n2. Produce signed inputs + a Postman environment: `pnpm --filter @getsava/backend sep10:sign --write-env`.\n3. Import this collection AND the generated environment (apps/backend/postman/sava-local.postman_environment.json), select it, and Run.\n\nSigning a SEP-10 challenge needs the Stellar SDK, so the signed challenge is supplied by the helper (signedChallenge). The webhook HMAC is computed in-collection with CryptoJS.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8787" },
+    { "key": "account", "value": "" },
+    { "key": "signedChallenge", "value": "" },
+    { "key": "savaToken", "value": "" },
+    { "key": "mercuryoSignKey", "value": "" },
+    { "key": "orderId", "value": "" },
+    { "key": "webhookBody", "value": "" },
+    { "key": "xSignature", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. SEP-10 Challenge",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('returns a challenge transaction', () => pm.expect(body.transaction).to.be.a('string').and.not.empty);",
+              "pm.test('returns the network passphrase', () => pm.expect(body.network_passphrase).to.include('Stellar'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/auth/sep10/challenge?account={{account}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "sep10", "challenge"],
+          "query": [{ "key": "account", "value": "{{account}}" }]
+        },
+        "description": "Server-signed SEP-10 challenge for {{account}}. The signed form (signedChallenge) is produced by the sep10:sign helper."
+      }
+    },
+    {
+      "name": "2. SEP-10 Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('returns a session JWT', () => pm.expect(body.token.split('.')).to.have.lengthOf(3));",
+              "pm.test('binds the stellar account', () => pm.expect(body.account).to.eql(pm.variables.get('account')));",
+              "pm.collectionVariables.set('savaToken', body.token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"transaction\": \"{{signedChallenge}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/sep10/token",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "sep10", "token"]
+        },
+        "description": "Verify the client-signed challenge and receive a Sava session JWT (saved to savaToken)."
+      }
+    },
+    {
+      "name": "3. Mercuryo Widget URL",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('returns a signed widget url', () => pm.expect(body.widget_url).to.include('signature='));",
+              "pm.test('quotes expected USDC', () => pm.expect(body.expected_usdc).to.be.a('string'));",
+              "pm.collectionVariables.set('orderId', body.order_id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{savaToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount_try\": \"500\",\n  \"lang\": \"tr\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/mercuryo/widget-url",
+          "host": ["{{baseUrl}}"],
+          "path": ["mercuryo", "widget-url"]
+        },
+        "description": "Issue an HMAC-signed Mercuryo widget URL for the authenticated session. Saves order_id for the webhook step."
+      }
+    },
+    {
+      "name": "4. Mercuryo Webhook",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Mercuryo signs the RAW callback body with HMAC-SHA256(signKey).",
+              "const body = JSON.stringify({ status: 'paid', merchant_transaction_id: pm.variables.get('orderId') });",
+              "pm.collectionVariables.set('webhookBody', body);",
+              "const sig = CryptoJS.HmacSHA256(body, pm.variables.get('mercuryoSignKey')).toString(CryptoJS.enc.Hex);",
+              "pm.collectionVariables.set('xSignature', sig);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('accepted (or idempotent no-op)', () => pm.expect(['ok', 'ignored']).to.include(body.status));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Signature", "value": "{{xSignature}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{{webhookBody}}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/webhooks/mercuryo",
+          "host": ["{{baseUrl}}"],
+          "path": ["webhooks", "mercuryo"]
+        },
+        "description": "Signed Mercuryo callback. The X-Signature HMAC is computed in the pre-request script with the mercuryoSignKey. Re-run to confirm idempotent dedup."
+      }
+    }
+  ]
+}

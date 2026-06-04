@@ -1,20 +1,39 @@
 # Copy to apps/backend/.dev.vars (gitignored) for local `wrangler dev`.
-# Production/staging secrets are set with `wrangler secret put` (YK-487).
+# Production/staging secrets are set with `wrangler secret put`.
 # Server-side ONLY — never shipped to the client bundle.
-#
-# Privy (App ID is public, but the SECRET lives here, never EXPO_PUBLIC_*):
-# PRIVY_APP_ID=
-# PRIVY_APP_SECRET=
-#
-# Mercuryo on-ramp (YK-461 delivers the sandbox widget id + keys; never client):
-# MERCURYO_WIDGET_ID=
-# MERCURYO_WIDGET_SECRET=     (signs widget URLs — SHA512 recipe)
-# MERCURYO_SIGN_KEY=          (verifies callback HMAC-SHA256)
-#
-# Testnet treasury bridge (TESTNET ONLY — delivers USDC the sandbox can't settle;
-# disabled on mainnet where Mercuryo settles USDC-on-Stellar directly):
+
+# --- Network + domains -------------------------------------------------------
+NETWORK=testnet
+HOME_DOMAIN=getsava.app
+WEB_AUTH_DOMAIN=api.getsava.app
+
+# --- SEP-10 web auth ---------------------------------------------------------
+# Server signing account (S…). Generate one with:
+#   pnpm --filter @getsava/backend exec tsx -e "import {generateKeypair} from '@getsava/sdk-stellar';console.log(generateKeypair())"
+SEP10_SERVER_SECRET=
+# HMAC secret used to sign Sava session JWTs (any long random string).
+SEP10_JWT_SECRET=
+# Session lifetime (seconds). Default 86400.
+SEP10_JWT_EXP_SECONDS=86400
+
+# --- Privy session binding (optional) ---------------------------------------
+# When set, the Privy access token sent on /auth/sep10/token is verified (ES256)
+# and the Privy user id is bound into the session. Fetch the verification_key:
+#   GET https://auth.privy.io/api/v1/apps/<app_id>  (Basic app_id:app_secret)
+# PRIVY_APP_ID=cmptsx19j00ba0cjv8nghcdhr
+# PRIVY_VERIFICATION_KEY="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
+
+# --- Mercuryo on-ramp --------------------------------------------------------
+MERCURYO_WIDGET_ID=
+MERCURYO_WIDGET_SECRET=      # signs widget URLs (SHA512 recipe)
+MERCURYO_SIGN_KEY=           # verifies callback HMAC-SHA256
+TRY_PER_USD=40               # static MVP quote rate
+
+# --- Testnet treasury bridge (TESTNET ONLY) ---------------------------------
+# Delivers USDC the sandbox can't settle; MUST stay disabled on mainnet.
 # BRIDGE_ENABLED=true
-# TREASURY_SECRET=            (S... funded testnet account; server-side only)
-# TRY_PER_USD=40              (static MVP quote rate)
-#
-# DATABASE_URL=   (Neon via Hyperdrive — YK-487)
+# TREASURY_SECRET=           # S… funded testnet account; server-side only
+
+# --- Postgres (idempotent webhook dedup) ------------------------------------
+# Neon connection string. Unset → in-memory store (local dev only).
+# DATABASE_URL=postgres://user:pass@host/db?sslmode=require

@@ -61,3 +61,6 @@ reference-mvp/
 
 # Scraped third-party docs (research notes, kept local only)
 .firecrawl/
+
+# Generated Postman environment (contains a local session token)
+apps/backend/postman/sava-local.postman_environment.json
