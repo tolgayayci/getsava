@@ -38,7 +38,11 @@ export type IconName =
   | 'usdc'
   | 'vault'
   | 'card'
-  | 'calc';
+  | 'calc'
+  | 'plane'
+  | 'gift'
+  | 'flag'
+  | 'target';
 
 interface IconProps {
   name: IconName;
@@ -294,6 +298,37 @@ export function Icon({ name, size = 20, stroke = color.ink }: IconProps) {
             strokeWidth={2}
             {...c}
           />
+        </>
+      )}
+      {name === 'plane' && (
+        <>
+          <Path d="M21 4L3 10.6l6.3 2.3L12 19l3-7.8z" strokeWidth={1.7} {...c} />
+          <Path d="M9.3 12.9L21 4" strokeWidth={1.7} {...c} />
+        </>
+      )}
+      {name === 'gift' && (
+        <>
+          <Rect x={4} y={8} width={16} height={4} rx={1} strokeWidth={1.7} {...c} />
+          <Path d="M5.5 12v7.5a1 1 0 001 1h11a1 1 0 001-1V12" strokeWidth={1.7} {...c} />
+          <Path d="M12 8v12.5" strokeWidth={1.7} {...c} />
+          <Path
+            d="M12 8C11 8 8.5 7.6 8.5 5.8 8.5 4.5 9.6 4 10.3 4.4 11.4 5 12 8 12 8zM12 8c1 0 3.5-.4 3.5-2.2 0-1.3-1.1-1.8-1.8-1.4C12.6 5 12 8 12 8z"
+            strokeWidth={1.6}
+            {...c}
+          />
+        </>
+      )}
+      {name === 'flag' && (
+        <>
+          <Path d="M6 21V4" strokeWidth={1.9} {...c} />
+          <Path d="M6 4.5h11.5l-2.2 3.6 2.2 3.6H6" strokeWidth={1.7} {...c} />
+        </>
+      )}
+      {name === 'target' && (
+        <>
+          <Circle cx={12} cy={12} r={8.5} strokeWidth={1.7} {...c} />
+          <Circle cx={12} cy={12} r={5} strokeWidth={1.7} {...c} />
+          <Circle cx={12} cy={12} r={1.9} fill={stroke} />
         </>
       )}
     </Svg>

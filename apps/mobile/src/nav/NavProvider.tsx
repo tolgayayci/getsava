@@ -24,9 +24,11 @@ export type StackRoute =
   | 'vault'
   | 'supply'
   | 'vaultWithdraw'
-  | 'calculator';
+  | 'calculator'
+  | 'goals'
+  | 'goalDetail';
 /** Bottom-sheet overlays. */
-export type SheetId = 'addFunds' | 'learn';
+export type SheetId = 'addFunds' | 'learn' | 'createGoal' | 'addToGoal';
 /** Home balance display currency. */
 export type DisplayCurrency = 'try' | 'usd';
 

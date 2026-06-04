@@ -9,6 +9,7 @@ import { useBalances } from '../../lib/useBalances';
 import { usePosition } from '../../lib/usePosition';
 import { useNav } from '../../nav';
 import { Icon, Notice } from '../../ui';
+import { GoalsHome } from './GoalsHome';
 
 /** Indicative pool rate shown on the "start earning" nudge (live APY is D3/T2). */
 const POOL_RATE = 8;
@@ -206,6 +207,9 @@ export function HomeScreen() {
             </Pressable>
           ) : null}
         </View>
+
+        {/* savings goals */}
+        <GoalsHome />
       </ScrollView>
     </>
   );

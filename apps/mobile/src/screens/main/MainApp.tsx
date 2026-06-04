@@ -7,8 +7,12 @@ import { TabBar } from '../../ui';
 import { ActivityScreen } from './ActivityScreen';
 import { AddFundsSheet } from './AddFundsSheet';
 import { AddLiraScreen } from './AddLiraScreen';
+import { AddToGoalSheet } from './AddToGoalSheet';
 import { CalculatorScreen } from './CalculatorScreen';
+import { CreateGoalSheet } from './CreateGoalSheet';
 import { EarnScreen } from './EarnScreen';
+import { GoalDetailScreen } from './GoalDetailScreen';
+import { GoalsScreen } from './GoalsScreen';
 import { HomeScreen } from './HomeScreen';
 import { MercuryoScreen } from './MercuryoScreen';
 import { OrderDetailScreen } from './OrderDetailScreen';
@@ -32,6 +36,8 @@ const STACK_TITLE: Record<StackRoute, string> = {
   supply: 'supplyFlow.title',
   vaultWithdraw: 'vaultWithdraw.title',
   calculator: 'calc.title',
+  goals: 'goals.title',
+  goalDetail: 'goals.title',
 };
 
 function ActiveScreen({ nav }: { nav: Nav }) {
@@ -69,6 +75,12 @@ function ActiveScreen({ nav }: { nav: Nav }) {
     if (top.route === 'calculator') {
       return <CalculatorScreen />;
     }
+    if (top.route === 'goals') {
+      return <GoalsScreen />;
+    }
+    if (top.route === 'goalDetail') {
+      return <GoalDetailScreen />;
+    }
     return (
       <Placeholder title={t(STACK_TITLE[top.route] as Parameters<typeof t>[0])} onBack={nav.back} />
     );
@@ -97,6 +109,8 @@ function Shell() {
       </View>
       {isTab ? <TabBar active={nav.tab} onChange={nav.go} bottomInset={insets.bottom} /> : null}
       <AddFundsSheet />
+      <CreateGoalSheet />
+      <AddToGoalSheet />
     </View>
   );
 }

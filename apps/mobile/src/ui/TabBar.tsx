@@ -20,7 +20,7 @@ interface TabBarProps {
 /** Minimal, borderless icons-only tab bar (Midas-style). */
 export function TabBar({ active, onChange, bottomInset = 0 }: TabBarProps) {
   return (
-    <View style={[styles.bar, { paddingBottom: 16 + bottomInset }]}>
+    <View style={[styles.bar, { paddingBottom: 8 + bottomInset }]}>
       {TABS.map((tab) => (
         <Pressable
           key={tab.id}
@@ -38,6 +38,6 @@ export function TabBar({ active, onChange, bottomInset = 0 }: TabBarProps) {
 }
 
 const styles = StyleSheet.create({
-  bar: { flexDirection: 'row', paddingTop: 12, paddingHorizontal: space.s7 },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 8 },
+  bar: { flexDirection: 'row', paddingTop: 8, paddingHorizontal: space.s7 },
+  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 6 },
 });
