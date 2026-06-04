@@ -100,18 +100,22 @@ export function EarnScreen() {
               </>
             ) : null}
 
-            <View style={styles.sec}>
-              <Text style={styles.secLabel}>{t('earn.explore')}</Text>
-            </View>
-            {held ? null : <Text style={styles.exploreSub}>{t('earn.exploreSub')}</Text>}
-            <Vrow
-              name={vault.name}
-              apy={vault.apy}
-              risk={vault.risk}
-              poolSizeUsdc={vault.tvlUsdc}
-              onPress={openVault}
-              held={false}
-            />
+            {held ? null : (
+              <>
+                <View style={styles.sec}>
+                  <Text style={styles.secLabel}>{t('earn.explore')}</Text>
+                </View>
+                <Text style={styles.exploreSub}>{t('earn.exploreSub')}</Text>
+                <Vrow
+                  name={vault.name}
+                  apy={vault.apy}
+                  risk={vault.risk}
+                  poolSizeUsdc={vault.tvlUsdc}
+                  onPress={openVault}
+                  held={false}
+                />
+              </>
+            )}
 
             <View style={styles.footNote}>
               <Icon name="info" size={12} stroke={color.inkFaint} />
