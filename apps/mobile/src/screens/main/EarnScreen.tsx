@@ -55,6 +55,7 @@ export function EarnScreen() {
           <>
             {held ? (
               <View style={styles.hero}>
+                <Text style={styles.heroLabel}>{t('earn.totalEarning')}</Text>
                 <Text style={styles.heroValue}>
                   {formatLira(usdcToTry(vault.suppliedUsdc), locale)}
                 </Text>
@@ -154,7 +155,15 @@ const styles = StyleSheet.create({
   loadWrap: { paddingTop: space.s8, alignItems: 'center' },
   errWrap: { marginTop: space.s2 },
 
-  hero: { marginTop: 0 },
+  hero: { marginTop: space.s1 },
+  heroLabel: {
+    ...type.label,
+    fontSize: 11,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: color.inkFaint,
+    marginBottom: 3,
+  },
   heroValue: {
     fontFamily: font.extraBold,
     fontSize: 36,
