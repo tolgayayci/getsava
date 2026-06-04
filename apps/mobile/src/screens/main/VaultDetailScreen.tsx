@@ -15,6 +15,7 @@ import { useVault } from '../../lib/useVault';
 import { useVaultStore } from '../../lib/vault-store';
 import { useNav } from '../../nav';
 import { Button, Icon, NavHeader, Notice, UsdcMark } from '../../ui';
+import { ActivityList } from '../../ui/ActivityList';
 import {
   BreakdownBar,
   LearnCard,
@@ -57,6 +58,7 @@ export function VaultDetailScreen() {
   const { vault } = useVault();
 
   const history = useVaultStore((s) => s.rateHistory);
+  const activity = useVaultStore((s) => s.activity);
   const [learnOpen, setLearnOpen] = useState(false);
   const [tf, setTf] = useState<Timeframe>('1M');
   const [scrubPoint, setScrubPoint] = useState<ChartPoint | null>(null);
@@ -82,6 +84,11 @@ export function VaultDetailScreen() {
   const delta = shownApy - startV;
   const up = delta >= 0;
   const real = hasRealHistory(history, tf, Date.now());
+  // This vault's own events only — supply/withdraw/yield (deposits & sends live
+  // on the main Activity screen, not here).
+  const vaultActivity = activity.filter(
+    (a) => a.type === 'supplied' || a.type === 'withdrew' || a.type === 'yield',
+  );
 
   return (
     <>
@@ -177,6 +184,14 @@ export function VaultDetailScreen() {
           status={vault.status}
           onExplorer={() => WebBrowser.openBrowserAsync(stellarExpertPoolUrl())}
         />
+
+        {/* This vault's activity */}
+        <Text style={styles.secLabel}>{t('vault.activity')}</Text>
+        {vaultActivity.length === 0 ? (
+          <Text style={styles.activityEmpty}>{t('vault.activityEmpty')}</Text>
+        ) : (
+          <ActivityList records={vaultActivity} max={8} />
+        )}
       </ScrollView>
 
       <View style={[styles.dock, { paddingBottom: insets.bottom + space.s2 }]}>
@@ -286,6 +301,7 @@ const styles = StyleSheet.create({
     marginTop: space.s6,
     marginBottom: space.s3,
   },
+  activityEmpty: { ...type.caption, color: color.inkFaint, paddingVertical: space.s2 },
   dock: {
     paddingHorizontal: space.gutter,
     paddingTop: space.s3,
