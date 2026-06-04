@@ -11,12 +11,16 @@ import { useVaultStore } from '../../lib/vault-store';
 import { useNav } from '../../nav';
 import { Icon, type IconName, NavHeader } from '../../ui';
 
-/** Visual + sign treatment per money-event kind. */
-const TYPE_META: Record<ActivityType, { icon: IconName; positive: boolean; brand: boolean }> = {
-  supplied: { icon: 'arrowUp', positive: false, brand: true },
-  added: { icon: 'plus', positive: false, brand: false },
-  withdrew: { icon: 'arrowDown', positive: false, brand: false },
-  yield: { icon: 'spark', positive: true, brand: false },
+/** Incoming events render +/green; the rest are outgoing (−, neutral). */
+const INCOMING = new Set<ActivityType>(['added', 'withdrew', 'yield']);
+
+/** Base icon per event kind (Mercuryo deposits override to the card icon). */
+const ICON: Record<ActivityType, IconName> = {
+  supplied: 'arrowUp',
+  withdrew: 'arrowDown',
+  added: 'arrowDown',
+  sent: 'arrowUp',
+  yield: 'spark',
 };
 
 interface DayGroup {
@@ -145,28 +149,40 @@ function ActivityRow({
   last: boolean;
   onPress?: () => void;
 }) {
-  const meta = TYPE_META[record.type];
-  const sub = record.type === 'yield' ? variableNote : clockTime(record.ts, locale);
-  const amountStyle = meta.positive ? [styles.amount, styles.amountG] : styles.amount;
-  const sign = meta.positive ? '+' : '−';
+  const incoming = INCOMING.has(record.type);
+  const mercuryo = record.source === 'mercuryo';
+  const vaultAction = record.type === 'supplied' || record.type === 'withdrew';
+  const badge: 'brand' | 'green' | 'neutral' =
+    mercuryo || vaultAction ? 'brand' : incoming ? 'green' : 'neutral';
+  const iconName: IconName = mercuryo ? 'card' : ICON[record.type];
+  const iconStroke =
+    badge === 'brand' ? color.purple : badge === 'green' ? color.green : color.inkDim;
+  const sub =
+    record.type === 'yield'
+      ? variableNote
+      : mercuryo
+        ? `${clockTime(record.ts, locale)} · Mercuryo`
+        : clockTime(record.ts, locale);
 
   const content = (
     <>
-      <View style={[styles.rowIc, meta.brand && styles.rowIcBrand, meta.positive && styles.rowIcG]}>
-        <Icon
-          name={meta.icon}
-          size={17}
-          stroke={meta.brand ? color.purple : meta.positive ? color.green : color.inkDim}
-        />
+      <View
+        style={[
+          styles.rowIc,
+          badge === 'brand' && styles.rowIcBrand,
+          badge === 'green' && styles.rowIcG,
+        ]}
+      >
+        <Icon name={iconName} size={17} stroke={iconStroke} />
       </View>
       <View style={styles.rowMid}>
         <Text style={styles.rowName}>{label}</Text>
         <Text style={styles.rowSub}>{sub}</Text>
       </View>
       <View style={styles.rowRight}>
-        <Text style={amountStyle}>
-          {sign}
-          {formatUsdc(record.usdc, locale, false)}
+        <Text style={[styles.amount, incoming && styles.amountG]}>
+          {incoming ? '+' : '−'}
+          {formatUsdc(record.usdc, locale)}
         </Text>
         <Text style={styles.amountSub}>{formatLira(record.tryAtTx, locale)}</Text>
       </View>

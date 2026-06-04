@@ -8,6 +8,7 @@ import { type DepositState, type OrderStatus, stubBackendClient } from '../../ba
 import { formatLira, formatUsdc, useTranslation } from '../../i18n';
 import { FX_TRY_PER_USDC } from '../../lib/fx';
 import { NETWORK } from '../../lib/network';
+import { useVaultStore } from '../../lib/vault-store';
 import { useNav } from '../../nav';
 import { Button, CopyRow, Icon, NavHeader, Notice } from '../../ui';
 
@@ -32,6 +33,7 @@ export function OrderDetailScreen() {
   const [status, setStatus] = useState<OrderStatus | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const addDeposit = useVaultStore((s) => s.addDeposit);
 
   const poll = useCallback(async () => {
     const s = await stubBackendClient.getOrder(orderId);
@@ -53,6 +55,21 @@ export function OrderDetailScreen() {
       }
     };
   }, [poll]);
+
+  // Record the Mercuryo card deposit in the money timeline once it settles
+  // (deduped by order id, so the poll re-running is harmless).
+  useEffect(() => {
+    if (status?.state === 'settled') {
+      addDeposit(
+        status.orderId,
+        Number(status.expectedUsdc),
+        Number(status.amountTry),
+        status.stellarTxHash,
+        status.createdAt,
+        'mercuryo',
+      );
+    }
+  }, [status, addDeposit]);
 
   const onRefresh = async () => {
     setRefreshing(true);

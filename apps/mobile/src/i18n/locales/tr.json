@@ -373,6 +373,7 @@
     "supplied": "Havuza sağlandı",
     "withdrew": "Havuzdan çekildi",
     "added": "Lira eklendi",
+    "sent": "Gönderildi",
     "yield": "Getiri kazanıldı",
     "emptyTitle": "Henüz işlem yok",
     "emptyBody": "Lira eklediğinizde, sağladığınızda, çektiğinizde veya kazandığınızda burada görünür.",

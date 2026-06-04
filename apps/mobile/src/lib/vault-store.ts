@@ -3,7 +3,10 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 /** Money-timeline event kinds (Activity screen / D4). */
-export type ActivityType = 'supplied' | 'withdrew' | 'added' | 'yield';
+export type ActivityType = 'supplied' | 'withdrew' | 'added' | 'yield' | 'sent';
+
+/** Where a money event came from — drives the Activity badge (e.g. Mercuryo). */
+export type ActivitySource = 'mercuryo' | 'wallet';
 
 export interface ActivityRecord {
   readonly id: string;
@@ -12,6 +15,7 @@ export interface ActivityRecord {
   /** ₺ value at time-of-transaction (D4 — placeholder flat FX until the feed lands). */
   readonly tryAtTx: number;
   readonly hash?: string;
+  readonly source?: ActivitySource;
   /** epoch ms */
   readonly ts: number;
 }
@@ -39,6 +43,17 @@ interface VaultStoreState {
   rateHistory: RateSample[];
   addSupply: (usdc: number, tryAtTx: number, hash: string, ts: number) => void;
   addWithdraw: (usdc: number, tryAtTx: number, hash: string, ts: number, full: boolean) => void;
+  /** Record a card/wallet deposit (USDC in). Deduped by id (e.g. order id). */
+  addDeposit: (
+    id: string,
+    usdc: number,
+    tryAtTx: number,
+    hash: string | undefined,
+    ts: number,
+    source: ActivitySource,
+  ) => void;
+  /** Record an external send (USDC out to an address). Deduped by tx hash. */
+  addSend: (usdc: number, tryAtTx: number, hash: string, ts: number) => void;
   addRecord: (rec: ActivityRecord) => void;
   /** Append a real APY sample (throttled + capped). */
   recordRate: (apy: number, ts: number) => void;
@@ -70,6 +85,31 @@ export const useVaultStore = create<VaultStoreState>()(
           netPrincipalUsdc: full ? 0 : Math.max(0, s.netPrincipalUsdc - usdc),
           activity: [{ id: hash, type: 'withdrew', usdc, tryAtTx, hash, ts }, ...s.activity],
         })),
+      addDeposit: (id, usdc, tryAtTx, hash, ts, source) =>
+        set((s) => {
+          if (s.activity.some((a) => a.id === id)) {
+            return s;
+          }
+          const rec: ActivityRecord = {
+            id,
+            type: 'added',
+            usdc,
+            tryAtTx,
+            ts,
+            source,
+            ...(hash ? { hash } : {}),
+          };
+          return { activity: [rec, ...s.activity] };
+        }),
+      addSend: (usdc, tryAtTx, hash, ts) =>
+        set((s) => {
+          if (s.activity.some((a) => a.id === hash)) {
+            return s;
+          }
+          return {
+            activity: [{ id: hash, type: 'sent', usdc, tryAtTx, hash, ts }, ...s.activity],
+          };
+        }),
       addRecord: (rec) => set((s) => ({ activity: [rec, ...s.activity] })),
       reset: () => set({ netPrincipalUsdc: 0, activity: [], rateHistory: [] }),
     }),

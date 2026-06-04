@@ -373,6 +373,7 @@
     "supplied": "Supplied to pool",
     "withdrew": "Withdrew from pool",
     "added": "Added lira",
+    "sent": "Sent",
     "yield": "Yield earned",
     "emptyTitle": "No activity yet",
     "emptyBody": "When you add lira, supply, withdraw or earn, it shows up here.",

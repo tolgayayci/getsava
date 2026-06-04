@@ -17,6 +17,7 @@ import { formatLira, formatUsdc, useTranslation } from '../../i18n';
 import { usdcToTry } from '../../lib/fx';
 import { NETWORK } from '../../lib/network';
 import { useBalances } from '../../lib/useBalances';
+import { useVaultStore } from '../../lib/vault-store';
 import { useNav } from '../../nav';
 import { Button, CopyRow, Icon, Keypad, type KeypadKey, NavHeader, Sheet } from '../../ui';
 
@@ -33,6 +34,7 @@ export function SendScreen() {
   const from = useWalletStore((s) => s.address) ?? '';
   const { signRawHash } = useSignRawHash();
   const { balances, refresh } = useBalances();
+  const addSend = useVaultStore((s) => s.addSend);
   const avail = Number.parseFloat(balances.usdc || '0');
 
   const [raw, setRaw] = useState('');
@@ -76,6 +78,7 @@ export function SendScreen() {
       const signed = await signTransaction(NETWORK, xdr, from, signRawHash);
       const txHash = await submitTransaction(NETWORK, signed);
       setHash(txHash);
+      addSend(amt, usdcToTry(amt), txHash, Date.now());
       setSheet('success');
     } catch {
       setSheet(null);
