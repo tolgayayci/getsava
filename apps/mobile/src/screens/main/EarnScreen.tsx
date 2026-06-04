@@ -55,7 +55,6 @@ export function EarnScreen() {
           <>
             {held ? (
               <View style={styles.hero}>
-                <Text style={styles.heroLabel}>{t('earn.totalEarning')}</Text>
                 <Text style={styles.heroValue}>
                   {formatLira(usdcToTry(vault.suppliedUsdc), locale)}
                 </Text>
@@ -145,32 +144,24 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 50,
+    height: 42,
     paddingHorizontal: space.gutter,
   },
   title: { ...type.h2, fontSize: 17, color: color.ink },
   scroll: { flex: 1 },
-  body: { paddingHorizontal: space.gutter, paddingTop: space.s2 },
+  body: { paddingHorizontal: space.gutter, paddingTop: space.s1 },
 
   loadWrap: { paddingTop: space.s8, alignItems: 'center' },
   errWrap: { marginTop: space.s2 },
 
-  hero: {
-    backgroundColor: color.surface,
-    borderWidth: 1,
-    borderColor: color.hair,
-    borderRadius: radius.md,
-    padding: 18,
-    marginTop: space.s2,
+  hero: { marginTop: 0 },
+  heroValue: {
+    fontFamily: font.extraBold,
+    fontSize: 36,
+    color: color.ink,
+    letterSpacing: -0.5,
   },
-  heroLabel: {
-    ...type.label,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    color: color.inkFaint,
-  },
-  heroValue: { fontFamily: font.extraBold, fontSize: 32, color: color.ink, marginTop: 8 },
-  heroSub: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 10 },
+  heroSub: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 8 },
   greenDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: color.green },
   heroYield: { fontFamily: font.bold, fontSize: 13.5, color: color.green },
   heroDot: { ...type.body, color: color.inkFaint },

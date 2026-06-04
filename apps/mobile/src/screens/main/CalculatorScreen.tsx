@@ -2,7 +2,7 @@ import { color, font, radius, space, type } from '@getsava/ui';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import type { Locale } from '../../i18n';
 import { formatLira, formatPct, formatUsdc, useTranslation } from '../../i18n';
 import { usdcToTry } from '../../lib/fx';
@@ -33,7 +33,7 @@ export function CalculatorScreen() {
 
   const [start, setStart] = useState(500);
   const [monthly, setMonthly] = useState(50);
-  const [termM, setTermM] = useState(12);
+  const [termM, setTermM] = useState(120);
   const [src, setSrc] = useState<'live' | 'custom'>('live');
   const [customRate, setCustomRate] = useState(8);
   const [picker, setPicker] = useState(false);
@@ -87,6 +87,15 @@ export function CalculatorScreen() {
       >
         {/* Projection card */}
         <View style={styles.proj}>
+          <Svg style={styles.projBg} width="100%" height="100%" preserveAspectRatio="none">
+            <Defs>
+              <LinearGradient id="projBg" x1="0" y1="0" x2="0.3" y2="1">
+                <Stop offset="0%" stopColor={color.purple2} stopOpacity={0.45} />
+                <Stop offset="100%" stopColor={color.purple} stopOpacity={0.04} />
+              </LinearGradient>
+            </Defs>
+            <Rect x={0} y={0} width="100%" height="100%" fill="url(#projBg)" />
+          </Svg>
           <Text style={styles.projK}>
             {t('calc.future')} · {termLabel}
           </Text>
@@ -336,11 +345,13 @@ const styles = StyleSheet.create({
   proj: {
     backgroundColor: color.surface,
     borderWidth: 1,
-    borderColor: color.hair,
+    borderColor: color.purpleBd,
     borderRadius: radius.lg,
     padding: space.s5,
     marginTop: space.s2,
+    overflow: 'hidden',
   },
+  projBg: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   projK: {
     ...type.label,
     letterSpacing: 1.2,
