@@ -61,3 +61,26 @@ export const useSignRawHash = privyUseSignRawHash as unknown as () => UseSignRaw
 
 // Re-export Hex so dependents have the signing type without reaching into sdk-stellar.
 export type { Hex };
+
+/** Best-effort email for the signed-in Privy user (email OTP, Google, or a linked account). */
+export function privyEmail(user: PrivyUser | null): string | null {
+  if (!user) {
+    return null;
+  }
+  if (user.email?.address) {
+    return user.email.address;
+  }
+  if (user.google?.email) {
+    return user.google.email;
+  }
+  for (const acc of user.linked_accounts ?? []) {
+    const a = acc as { address?: unknown; email?: unknown };
+    if (typeof a.address === 'string' && a.address.includes('@')) {
+      return a.address;
+    }
+    if (typeof a.email === 'string' && a.email.includes('@')) {
+      return a.email;
+    }
+  }
+  return null;
+}

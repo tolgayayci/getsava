@@ -2,7 +2,7 @@ import { ensureUsdcTrustline, findStellarAddress, getBalances } from '@getsava/s
 import type { Network } from '@getsava/types';
 import { useCallback, useEffect, useRef } from 'react';
 import type { BackendClient } from '../backend/client';
-import { useCreateWallet, usePrivy, useSignRawHash } from './privy-hooks';
+import { privyEmail, useCreateWallet, usePrivy, useSignRawHash } from './privy-hooks';
 import { useWalletStore } from './store';
 
 const NETWORK: Network = (process.env.EXPO_PUBLIC_STELLAR_NETWORK as Network) ?? 'testnet';
@@ -28,7 +28,16 @@ export function useProvisioning(backend: BackendClient): UseProvisioningResult {
   const setAddress = useWalletStore((s) => s.setAddress);
   const setBalances = useWalletStore((s) => s.setBalances);
   const setProvisioning = useWalletStore((s) => s.setProvisioning);
+  const setEmail = useWalletStore((s) => s.setEmail);
   const inFlight = useRef(false);
+
+  // Persist the signed-in email independently of provisioning, so returning
+  // (already-provisioned) users get it too — used by Settings + the Home avatar.
+  useEffect(() => {
+    if (user) {
+      setEmail(privyEmail(user));
+    }
+  }, [user, setEmail]);
 
   const run = useCallback(async () => {
     // Skip entirely if already provisioned (restored from persisted state) — a

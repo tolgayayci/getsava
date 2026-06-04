@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSession, useWalletStore } from '../../auth';
+import { privyEmail, usePrivy } from '../../auth/privy-hooks';
 import { useTranslation } from '../../i18n';
 import { useNav } from '../../nav';
 import { Button, CopyRow, Icon, type IconName, Sheet } from '../../ui';
@@ -16,8 +17,9 @@ export function SettingsScreen() {
   const nav = useNav();
   const insets = useSafeAreaInsets();
   const { signOut } = useSession();
+  const { user } = usePrivy();
   const address = useWalletStore((s) => s.address) ?? '';
-  const email = useWalletStore((s) => s.email);
+  const email = useWalletStore((s) => s.email) ?? privyEmail(user);
   const [sheet, setSheet] = useState<null | 'wallet' | 'signout'>(null);
 
   const legal: Array<{ key: string; label: string }> = [
