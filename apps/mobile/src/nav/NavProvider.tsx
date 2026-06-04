@@ -23,7 +23,8 @@ export type StackRoute =
   | 'activity'
   | 'vault'
   | 'supply'
-  | 'vaultWithdraw';
+  | 'vaultWithdraw'
+  | 'calculator';
 /** Bottom-sheet overlays. */
 export type SheetId = 'addFunds' | 'learn';
 /** Home balance display currency. */

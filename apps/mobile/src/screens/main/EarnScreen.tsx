@@ -1,6 +1,7 @@
 import { color, font, radius, space, type } from '@getsava/ui';
 import {
   ActivityIndicator,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -81,6 +82,18 @@ export function EarnScreen() {
                 />
               </View>
             ) : null}
+
+            {/* Yield-calculator entry */}
+            <Pressable style={styles.calcBanner} onPress={() => nav.push('calculator')}>
+              <View style={styles.calcIc}>
+                <Icon name="calc" size={20} stroke={color.purpleInk} />
+              </View>
+              <View style={styles.calcTx}>
+                <Text style={styles.calcT}>{t('calc.bannerT')}</Text>
+                <Text style={styles.calcD}>{t('calc.bannerD')}</Text>
+              </View>
+              <Icon name="chevR" size={18} stroke={color.purple} />
+            </Pressable>
 
             {held ? (
               <>
@@ -165,6 +178,29 @@ const styles = StyleSheet.create({
 
   noticeTop: { marginTop: space.s2 },
   noticeAfterHero: { marginTop: space.s4 },
+
+  calcBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.s3,
+    backgroundColor: color.purpleSoft,
+    borderWidth: 1,
+    borderColor: color.purpleBd,
+    borderRadius: radius.md,
+    padding: space.s3,
+    marginTop: space.s4,
+  },
+  calcIc: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.sm,
+    backgroundColor: color.purple,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calcTx: { flex: 1 },
+  calcT: { ...type.bodyStrong, fontSize: 14.5, color: color.ink },
+  calcD: { ...type.caption, color: color.inkDim, marginTop: 2 },
 
   sec: { marginTop: space.s6, marginBottom: space.s3 },
   secLabel: {

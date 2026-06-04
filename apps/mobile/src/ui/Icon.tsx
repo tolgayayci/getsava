@@ -37,7 +37,8 @@ export type IconName =
   | 'share'
   | 'usdc'
   | 'vault'
-  | 'card';
+  | 'card'
+  | 'calc';
 
 interface IconProps {
   name: IconName;
@@ -282,6 +283,17 @@ export function Icon({ name, size = 20, stroke = color.ink }: IconProps) {
           <Rect x={3} y={5.5} width={18} height={13} rx={2.5} strokeWidth={1.7} {...c} />
           <Path d="M3 9.5h18" strokeWidth={1.7} {...c} />
           <Path d="M6.5 14.5h3" strokeWidth={1.8} {...c} />
+        </>
+      )}
+      {name === 'calc' && (
+        <>
+          <Rect x={5} y={3} width={14} height={18} rx={2.5} strokeWidth={1.7} {...c} />
+          <Path d="M8.5 7h7" strokeWidth={1.7} {...c} />
+          <Path
+            d="M9 11.5h.01M12 11.5h.01M15 11.5h.01M9 14.5h.01M12 14.5h.01M15 14.5h.01M9 17.5h.01M12 17.5h.01M15 17.5h.01"
+            strokeWidth={2}
+            {...c}
+          />
         </>
       )}
     </Svg>

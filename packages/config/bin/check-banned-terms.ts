@@ -27,6 +27,7 @@ const DISCLAIMER_NAMESPACES = new Set([
   'preSupply',
   'tax',
   'circuitBreaker',
+  'calc',
 ]);
 
 /**

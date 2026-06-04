@@ -7,6 +7,7 @@ import { TabBar } from '../../ui';
 import { ActivityScreen } from './ActivityScreen';
 import { AddFundsSheet } from './AddFundsSheet';
 import { AddLiraScreen } from './AddLiraScreen';
+import { CalculatorScreen } from './CalculatorScreen';
 import { EarnScreen } from './EarnScreen';
 import { HomeScreen } from './HomeScreen';
 import { MercuryoScreen } from './MercuryoScreen';
@@ -30,6 +31,7 @@ const STACK_TITLE: Record<StackRoute, string> = {
   vault: 'earn.title',
   supply: 'supplyFlow.title',
   vaultWithdraw: 'vaultWithdraw.title',
+  calculator: 'calc.title',
 };
 
 function ActiveScreen({ nav }: { nav: Nav }) {
@@ -63,6 +65,9 @@ function ActiveScreen({ nav }: { nav: Nav }) {
     }
     if (top.route === 'activity') {
       return <ActivityScreen />;
+    }
+    if (top.route === 'calculator') {
+      return <CalculatorScreen />;
     }
     return (
       <Placeholder title={t(STACK_TITLE[top.route] as Parameters<typeof t>[0])} onBack={nav.back} />
