@@ -20,7 +20,7 @@ export function SettingsScreen() {
   const { user } = usePrivy();
   const address = useWalletStore((s) => s.address) ?? '';
   const email = useWalletStore((s) => s.email) ?? privyEmail(user);
-  const [sheet, setSheet] = useState<null | 'wallet' | 'signout'>(null);
+  const [sheet, setSheet] = useState<null | 'signout'>(null);
 
   const legal: Array<{ key: string; label: string }> = [
     { key: 'terms', label: t('settings.terms') },
@@ -65,13 +65,6 @@ export function SettingsScreen() {
             onCopy={() => nav.toast(t('settings.addrCopied'))}
           />
         </View>
-        <Button
-          variant="quiet"
-          iconName="info"
-          label={t('settings.walletWhat')}
-          onPress={() => setSheet('wallet')}
-        />
-
         <Text style={[styles.secLabel, styles.secGap]}>{t('settings.legal')}</Text>
         <View style={styles.group}>
           {legal.map((l, i) => (
@@ -104,23 +97,6 @@ export function SettingsScreen() {
         </View>
         <Text style={styles.version}>{t('settings.version')} 1.0.0 (1)</Text>
       </ScrollView>
-
-      <Sheet
-        visible={sheet === 'wallet'}
-        onClose={() => setSheet(null)}
-        title={t('settings.wallet')}
-        dock={
-          <Button variant="secondary" label={t('common.done')} onPress={() => setSheet(null)} />
-        }
-      >
-        <CopyRow
-          label={t('settings.wallet')}
-          value={short(address)}
-          copyValue={address}
-          onCopy={() => nav.toast(t('settings.addrCopied'))}
-        />
-        <Text style={styles.sheetBody}>{t('settings.walletWhatBody')}</Text>
-      </Sheet>
 
       <Sheet
         visible={sheet === 'signout'}
