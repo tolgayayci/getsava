@@ -3,6 +3,10 @@ main = "src/index.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Public API domain — Cloudflare provisions the DNS record + TLS cert on the
+# getsava.app zone. The testnet backend serves /docs + /openapi.json here.
+routes = [{ pattern = "api.getsava.app", custom_domain = true }]
+
 # Non-secret config. Secrets (SEP10_SERVER_SECRET, SEP10_JWT_SECRET,
 # MERCURYO_WIDGET_SECRET, MERCURYO_SIGN_KEY, PRIVY_VERIFICATION_KEY,
 # TREASURY_SECRET, DATABASE_URL) are set with `wrangler secret put` — never here.
