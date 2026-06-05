@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sava",
     "slug": "sava",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "sava",
     "userInterfaceStyle": "automatic",
@@ -23,7 +23,8 @@
       "expo-web-browser",
       "expo-localization",
       "expo-font",
-      "./plugins/withExpoSwift5.js"
+      "./plugins/withExpoSwift5.js",
+      "@sentry/react-native"
     ]
   }
 }

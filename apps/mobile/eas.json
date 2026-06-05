@@ -34,7 +34,8 @@
       "channel": "production",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_STELLAR_NETWORK": "mainnet"
+        "EXPO_PUBLIC_STELLAR_NETWORK": "testnet",
+        "EXPO_PUBLIC_PRIVY_APP_ID": "cmptsx19j00ba0cjv8nghcdhr"
       }
     }
   },
