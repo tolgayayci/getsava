@@ -25,6 +25,12 @@
       "expo-font",
       "./plugins/withExpoSwift5.js",
       "@sentry/react-native"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "39a9b2cd-b07a-4a91-ab86-0a1ce0045089"
+      }
+    },
+    "owner": "tolga0x"
   }
 }
