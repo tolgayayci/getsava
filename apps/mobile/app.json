@@ -23,8 +23,7 @@
       "expo-web-browser",
       "expo-localization",
       "expo-font",
-      "./plugins/withExpoSwift5.js",
-      "@sentry/react-native"
+      "./plugins/withExpoSwift5.js"
     ],
     "extra": {
       "eas": {
