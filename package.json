@@ -36,7 +36,6 @@
       "@biomejs/biome",
       "esbuild",
       "lefthook",
-      "sharp",
       "unrs-resolver",
       "workerd"
     ],
