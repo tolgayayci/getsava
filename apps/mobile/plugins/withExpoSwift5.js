@@ -35,33 +35,44 @@ const EXPO_PREFIXES = ['Expo', 'EX', 'ReactNativePasskeys', 'expo-'];
 // leave its language mode untouched so its Swift regex literal keeps working.
 const SKsIP = ['ExpoModulesJSI'];
 
-const SNIPPET = `
-  post_install do |installer|
+// Ruby injected INSIDE Expo's existing `post_install do |installer|` hook.
+// CocoaPods rejects multiple post_install hooks, so we MERGE rather than append
+// a second block (which is what broke the EAS build). Locals are namespaced to
+// avoid clashing with variables in the surrounding hook.
+const INNER = `
     ${MARKER}
-    expo_prefixes = ['Expo', 'EX', 'ReactNativePasskeys', 'expo-']
-    skip = ['ExpoModulesJSI']
+    getsava_expo_prefixes = ['Expo', 'EX', 'ReactNativePasskeys', 'expo-']
+    getsava_skip = ['ExpoModulesJSI']
     installer.pods_project.targets.each do |target|
-      next if skip.include?(target.name)
-      next unless expo_prefixes.any? { |p| target.name.start_with?(p) }
+      next if getsava_skip.include?(target.name)
+      next unless getsava_expo_prefixes.any? { |p| target.name.start_with?(p) }
       target.build_configurations.each do |config|
         config.build_settings['SWIFT_VERSION'] = '5.0'
         config.build_settings['SWIFT_STRICT_CONCURRENCY'] = 'minimal'
         config.build_settings['SWIFT_APPROACHABLE_CONCURRENCY'] = 'NO'
         config.build_settings['SWIFT_DEFAULT_ACTOR_ISOLATION'] = 'nonisolated'
       end
-    end
-  end
-`;
+    end`;
 
 function patchPodfile(contents) {
   if (contents.includes(MARKER)) {
     return contents;
   }
-  const lastEnd = contents.lastIndexOf('\nend');
-  if (lastEnd === -1) {
-    return `${contents}\n${SNIPPET}`;
+  // Merge into the existing post_install hook (only one is allowed).
+  const hook = contents.match(/post_install do \|(\w+)\|/);
+  if (hook) {
+    const insertAt = hook.index + hook[0].length;
+    const installerVar = hook[1];
+    const inner =
+      installerVar === 'installer' ? INNER : INNER.replace(/\binstaller\b/g, installerVar);
+    return `${contents.slice(0, insertAt)}\n${inner}${contents.slice(insertAt)}`;
   }
-  return `${contents.slice(0, lastEnd)}\n${SNIPPET}${contents.slice(lastEnd)}`;
+  // Fallback: no post_install present — add a single one.
+  const block = `\n  post_install do |installer|${INNER}\n  end\n`;
+  const lastEnd = contents.lastIndexOf('\nend');
+  return lastEnd === -1
+    ? `${contents}${block}`
+    : `${contents.slice(0, lastEnd)}${block}${contents.slice(lastEnd)}`;
 }
 
 const withPodfilePatch = (config) =>
@@ -86,3 +97,4 @@ const withNoPrecompiled = (config) =>
 module.exports = (config) => withPodfilePatch(withNoPrecompiled(config));
 module.exports.EXPO_PREFIXES = EXPO_PREFIXES;
 module.exports.SKIP = SKsIP;
+module.exports.patchPodfile = patchPodfile;
