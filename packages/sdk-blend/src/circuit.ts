@@ -5,8 +5,13 @@
  * site: supply checks `tripped`, withdraw never does).
  */
 export const CIRCUIT_THRESHOLDS = {
-  /** Backstop coverage (backstop USD / pool TVL USD) must stay ≥ 8%. */
+  /** Backstop coverage (backstop USD / pool TVL USD) should stay ≥ 8%… */
   minBackstopCoverage: 0.08,
+  /** …UNLESS the backstop is large in absolute terms (≥ $1M first-loss capital).
+   * Large, deep pools naturally run a lower coverage RATIO but carry far more
+   * absolute protection, so a low ratio alone shouldn't halt them. Coverage only
+   * trips when the ratio is low AND the absolute backstop is small. */
+  minBackstopUsd: 1_000_000,
   /** bRate must not move more than ±2% between 5-minute samples (it should only creep up). */
   maxBRateDrift: 0.02,
   /** Pool oracle USDC price must stay within ±0.5% of an external reference. */
@@ -43,8 +48,14 @@ export interface CircuitState {
 export function evaluateCircuitBreaker(i: CircuitInputs): CircuitState {
   const reasons: TripReason[] = [];
 
+  // Size-aware: a thin RATIO only trips when the backstop is also small in
+  // absolute terms — a large pool with ≥ $1M first-loss capital is not halted
+  // just for a low ratio (see minBackstopUsd).
   const backstopCoverageRatio = i.poolTvlUsd > 0 ? i.backstopCoverageUsd / i.poolTvlUsd : 0;
-  if (backstopCoverageRatio < CIRCUIT_THRESHOLDS.minBackstopCoverage) {
+  if (
+    backstopCoverageRatio < CIRCUIT_THRESHOLDS.minBackstopCoverage &&
+    i.backstopCoverageUsd < CIRCUIT_THRESHOLDS.minBackstopUsd
+  ) {
     reasons.push('backstop_coverage');
   }
 
