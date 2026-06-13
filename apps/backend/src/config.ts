@@ -34,8 +34,18 @@ export interface Env {
   BRIDGE_ENABLED?: string;
   /** Treasury source secret (S…) — testnet bridge only. */
   TREASURY_SECRET?: string;
-  /** Neon Postgres connection string (idempotent webhook dedup). */
+  /** Neon Postgres connection string (idempotent webhook dedup + circuit metrics). */
   DATABASE_URL?: string;
+  /** Cloudflare D1 (SQLite) binding — durable circuit metrics store (preferred over DATABASE_URL). */
+  DB?: D1Database;
+  /** D1 circuit breaker — staging trip override: a TripReason, a comma-list, or 'none'. */
+  CIRCUIT_FORCE_TRIP?: string;
+  /** On-call incoming webhook (Slack/Discord/generic) for circuit-trip alerts. */
+  CIRCUIT_ALERT_WEBHOOK?: string;
+  /** Optional external secondary USDC price feed (oracle-divergence reference). */
+  CIRCUIT_REFERENCE_URL?: string;
+  /** Bearer token gating the manual POST /circuit/sample trigger. */
+  CIRCUIT_ADMIN_TOKEN?: string;
 }
 
 /** Misconfiguration surfaced as a 503 by the routes (fail loud, never silent). */

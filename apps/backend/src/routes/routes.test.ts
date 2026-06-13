@@ -2,7 +2,7 @@ import { createHmac } from 'node:crypto';
 import { generateKeypair, signChallengeWithSecret } from '@getsava/sdk-stellar';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Env } from '../config';
-import app from '../index';
+import { app } from '../index';
 import { resetOrderStoreForTests } from '../mercuryo/service';
 
 const SERVER = generateKeypair();
