@@ -1,4 +1,5 @@
 import {
+  assertPoolWhitelisted,
   blendConfig,
   buildSupplyTx,
   buildWithdrawTx,
@@ -13,9 +14,11 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { useWalletStore } from '../auth';
 import { useSignRawHash } from '../auth/privy-hooks';
+import { assertSupplyAllowed } from './circuit';
 import { usdcToTry } from './fx';
 import { NETWORK } from './network';
 import { useVaultStore } from './vault-store';
+import { deriveYieldUsdc } from './yield-calc';
 
 /** View-model the Earn screens render. One USDC vault (the Blend pool) for now. */
 export interface VaultView {
@@ -34,14 +37,20 @@ export interface VaultView {
   readonly risk: 'low' | 'mid';
   readonly supplied: boolean;
   readonly suppliedUsdc: number;
-  readonly yieldUsdc: number;
+  /** Earned USDC, or null = N/A (can't be proven on-chain — never a fabricated number). */
+  readonly yieldUsdc: number | null;
   readonly bTokens: bigint;
 }
 
 const VAULT_ID = 'usdc-core';
 const VAULT_NAME = 'USDC Core';
 
-function deriveVault(snap: ReserveSnapshot, pos: UserPosition, netPrincipal: number): VaultView {
+function deriveVault(
+  snap: ReserveSnapshot,
+  pos: UserPosition,
+  netPrincipal: number,
+  fresh: boolean,
+): VaultView {
   return {
     id: VAULT_ID,
     name: VAULT_NAME,
@@ -55,7 +64,7 @@ function deriveVault(snap: ReserveSnapshot, pos: UserPosition, netPrincipal: num
     risk: 'low',
     supplied: pos.suppliedUsdc > 0,
     suppliedUsdc: pos.suppliedUsdc,
-    yieldUsdc: Math.max(0, pos.suppliedUsdc - netPrincipal),
+    yieldUsdc: deriveYieldUsdc(pos.suppliedUsdc, snap.bRate, netPrincipal, fresh),
     bTokens: pos.bTokens,
   };
 }
@@ -85,6 +94,7 @@ export function useVault(): UseVault {
   const addSupply = useVaultStore((s) => s.addSupply);
   const addWithdraw = useVaultStore((s) => s.addWithdraw);
   const recordRate = useVaultStore((s) => s.recordRate);
+  const recordPortfolio = useVaultStore((s) => s.recordPortfolio);
 
   const [snap, setSnap] = useState<ReserveSnapshot | null>(null);
   const [pos, setPos] = useState<UserPosition | null>(null);
@@ -103,13 +113,16 @@ export function useVault(): UseVault {
       const snapshot = readReserveSnapshot(pool, cfg.usdcSac);
       setSnap(snapshot);
       recordRate(snapshot.supplyApy * 100, Date.now());
-      setPos(await readUserPosition(pool, address, cfg.usdcSac));
+      const position = await readUserPosition(pool, address, cfg.usdcSac);
+      setPos(position);
+      // Sample the REAL on-chain position value for the 90-day portfolio chart.
+      recordPortfolio(position.suppliedUsdc, useVaultStore.getState().netPrincipalUsdc, Date.now());
     } catch {
       setError(true);
     } finally {
       setLoading(false);
     }
-  }, [address, recordRate]);
+  }, [address, recordRate, recordPortfolio]);
 
   useEffect(() => {
     void refresh();
@@ -121,6 +134,11 @@ export function useVault(): UseVault {
         throw new Error('No wallet address');
       }
       const cfg = blendConfig(NETWORK);
+      // D1 defense, in order: (1) pool whitelist (only an audited pool may receive
+      // deposits), then (2) the live circuit breaker (halts new supply on a trip).
+      // Both gate SUPPLY only — withdraw() below never consults them.
+      assertPoolWhitelisted(cfg.poolId, NETWORK);
+      await assertSupplyAllowed();
       const { preparedXdr } = await buildSupplyTx(cfg, address, usdc);
       const { hash, status } = await signAndSubmit(NETWORK, preparedXdr, address, signRawHash);
       if (status !== 'SUCCESS') {
@@ -151,7 +169,8 @@ export function useVault(): UseVault {
     [address, signRawHash, addWithdraw, refresh],
   );
 
-  const vault = snap ? deriveVault(snap, pos ?? EMPTY_POSITION, netPrincipal) : null;
+  // `!error` = the last refresh succeeded; on a failed fetch yield resolves to N/A.
+  const vault = snap ? deriveVault(snap, pos ?? EMPTY_POSITION, netPrincipal, !error) : null;
 
   return { vault, loading, error, refresh, supply, withdraw };
 }

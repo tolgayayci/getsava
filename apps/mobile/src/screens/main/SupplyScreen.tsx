@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatLira, formatPct, formatUsdc, useTranslation } from '../../i18n';
+import { useCircuit } from '../../lib/circuit';
 import { usdcToTry } from '../../lib/fx';
 import { NETWORK } from '../../lib/network';
 import { useBalances } from '../../lib/useBalances';
@@ -27,6 +28,7 @@ export function SupplyScreen() {
   const insets = useSafeAreaInsets();
   const { vault, supply } = useVault();
   const { balances, refresh } = useBalances();
+  const circuit = useCircuit();
   const avail = Number.parseFloat(balances.usdc || '0');
 
   const [step, setStep] = useState<Step>('amount');
@@ -79,6 +81,16 @@ export function SupplyScreen() {
       <>
         <NavHeader title={t('supplyFlow.title')} onBack={nav.back} />
         <View style={styles.body}>
+          {circuit.tripped ? (
+            <View style={styles.haltNotice}>
+              <Notice
+                tone="red"
+                icon="alert"
+                title={t('circuit.haltedTitle')}
+                body={t('circuit.haltedBody')}
+              />
+            </View>
+          ) : null}
           {vault ? <VaultSummary name={vault.name} apy={vault.apy} mode="supply" /> : null}
           <View style={styles.amount}>
             <Text style={styles.amtLabel}>{t('supplyFlow.amountLabel')}</Text>
@@ -102,8 +114,8 @@ export function SupplyScreen() {
         </View>
         <View style={[styles.dock, { paddingBottom: insets.bottom + space.s2 }]}>
           <Button
-            label={t('supplyFlow.review')}
-            disabled={!valid}
+            label={circuit.tripped ? t('circuit.depositsPaused') : t('supplyFlow.review')}
+            disabled={!valid || circuit.tripped}
             onPress={() => setStep('disclosure')}
           />
         </View>
@@ -279,6 +291,7 @@ function SumRow({
 
 const styles = StyleSheet.create({
   body: { flex: 1, paddingHorizontal: space.gutter, paddingTop: space.s2 },
+  haltNotice: { marginBottom: space.s3 },
   scroll: { flex: 1 },
   scrollBody: { paddingHorizontal: space.gutter, paddingTop: space.s4 },
   flex: { flex: 1 },

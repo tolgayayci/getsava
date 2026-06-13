@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { vaultStorage } from './vault-storage';
 
 /** Money-timeline event kinds (Activity screen / D4). */
 export type ActivityType = 'supplied' | 'withdrew' | 'added' | 'yield' | 'sent';
@@ -12,7 +12,7 @@ export interface ActivityRecord {
   readonly id: string;
   readonly type: ActivityType;
   readonly usdc: number;
-  /** ₺ value at time-of-transaction (D4 — placeholder flat FX until the feed lands). */
+  /** ₺ value captured at time-of-transaction from the live FX feed (CoinGecko/Binance). */
   readonly tryAtTx: number;
   readonly hash?: string;
   readonly source?: ActivitySource;
@@ -32,6 +32,19 @@ export interface RateSample {
 const RATE_SAMPLE_INTERVAL_MS = 10 * 60_000;
 const RATE_HISTORY_CAP = 2000;
 
+/** Portfolio-value samples: at most one per 6h, capped — feeds the 90-day chart (D4). */
+const PORTFOLIO_SAMPLE_INTERVAL_MS = 6 * 60 * 60_000;
+const PORTFOLIO_HISTORY_CAP = 400;
+
+/** One portfolio observation: on-chain position value + tracked principal at a time. */
+export interface PortfolioSample {
+  readonly ts: number;
+  /** On-chain underlying USDC value of the position (matches Stellar/Blend state). */
+  readonly valueUsdc: number;
+  /** Tracked cost basis at that time (value − principal ≈ yield). */
+  readonly principalUsdc: number;
+}
+
 interface VaultStoreState {
   /**
    * Off-chain principal tracking. The chain stores only bTokens, not cost basis,
@@ -41,6 +54,8 @@ interface VaultStoreState {
   activity: ActivityRecord[];
   /** REAL observed APY history (the chart's source of truth; grows as it samples). */
   rateHistory: RateSample[];
+  /** REAL portfolio-value history (feeds the 90-day portfolio chart). */
+  portfolioHistory: PortfolioSample[];
   addSupply: (usdc: number, tryAtTx: number, hash: string, ts: number) => void;
   addWithdraw: (usdc: number, tryAtTx: number, hash: string, ts: number, full: boolean) => void;
   /** Record a card/wallet deposit (USDC in). Deduped by id (e.g. order id). */
@@ -57,6 +72,8 @@ interface VaultStoreState {
   addRecord: (rec: ActivityRecord) => void;
   /** Append a real APY sample (throttled + capped). */
   recordRate: (apy: number, ts: number) => void;
+  /** Append a real portfolio-value sample (throttled + capped). */
+  recordPortfolio: (valueUsdc: number, principalUsdc: number, ts: number) => void;
   reset: () => void;
 }
 
@@ -67,6 +84,19 @@ export const useVaultStore = create<VaultStoreState>()(
       netPrincipalUsdc: 0,
       activity: [],
       rateHistory: [],
+      portfolioHistory: [],
+      recordPortfolio: (valueUsdc, principalUsdc, ts) =>
+        set((s) => {
+          const last = s.portfolioHistory[s.portfolioHistory.length - 1];
+          if (last && ts - last.ts < PORTFOLIO_SAMPLE_INTERVAL_MS) {
+            return s;
+          }
+          return {
+            portfolioHistory: [...s.portfolioHistory, { ts, valueUsdc, principalUsdc }].slice(
+              -PORTFOLIO_HISTORY_CAP,
+            ),
+          };
+        }),
       recordRate: (apy, ts) =>
         set((s) => {
           const last = s.rateHistory[s.rateHistory.length - 1];
@@ -111,8 +141,9 @@ export const useVaultStore = create<VaultStoreState>()(
           };
         }),
       addRecord: (rec) => set((s) => ({ activity: [rec, ...s.activity] })),
-      reset: () => set({ netPrincipalUsdc: 0, activity: [], rateHistory: [] }),
+      reset: () =>
+        set({ netPrincipalUsdc: 0, activity: [], rateHistory: [], portfolioHistory: [] }),
     }),
-    { name: 'sava-vault', storage: createJSONStorage(() => AsyncStorage) },
+    { name: 'sava-vault', storage: createJSONStorage(() => vaultStorage) },
   ),
 );

@@ -7,7 +7,8 @@ import { useVault } from './useVault';
 export interface Position {
   readonly vaultName: string;
   readonly suppliedUsdc: number;
-  readonly yieldUsdc: number;
+  /** Earned USDC, or null = N/A (not provable on-chain). */
+  readonly yieldUsdc: number | null;
   readonly rate: number;
 }
 

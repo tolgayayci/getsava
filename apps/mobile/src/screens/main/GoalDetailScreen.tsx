@@ -4,6 +4,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 're
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatDate, formatLira, formatUsdc, useTranslation } from '../../i18n';
 import { usdcToTry } from '../../lib/fx';
+import { fireMilestoneNotification } from '../../lib/goal-notify';
 import { goalProgress, goalValue, goalYield, useGoalsStore } from '../../lib/goals-store';
 import { useVault } from '../../lib/useVault';
 import { useNav } from '../../nav';
@@ -37,6 +38,9 @@ export function GoalDetailScreen() {
     return <NavHeader title={t('goals.title')} onBack={nav.back} />;
   }
 
+  // null → 0 for the bar (never inflate progress with unprovable yield); the
+  // yield-boost callout shows "—" when yield is N/A.
+  const yieldNA = vault?.yieldUsdc === null;
   const vy = vault?.yieldUsdc ?? 0;
   const yieldShare = goalYield(goal, goals, vy);
   const value = goalValue(goal, goals, vy);
@@ -46,6 +50,14 @@ export function GoalDetailScreen() {
   const tint = GOAL_TINT[goal.color];
 
   const showPreview = () => {
+    // Fire a REAL OS notification (the actual milestone alert) + the in-app card.
+    const ms = reached ? 100 : ([75, 50, 25].find((m) => pct * 100 >= m) ?? 25);
+    void fireMilestoneNotification(
+      reached ? t('goals.pushReached') : t('goals.pushMilestone'),
+      reached
+        ? t('goals.pushReachedBody', { name: goal.name })
+        : t('goals.pushMilestoneBody', { pct: String(ms), name: goal.name }),
+    );
     setPreview(true);
     if (previewTimer.current) {
       clearTimeout(previewTimer.current);
@@ -120,7 +132,9 @@ export function GoalDetailScreen() {
               <Icon name="earn" size={17} stroke={color.green} />
             </View>
             <Text style={styles.boostT}>{t('goals.yieldBoost')}</Text>
-            <Text style={styles.boostAmt}>+{formatUsdc(yieldShare, locale)}</Text>
+            <Text style={styles.boostAmt}>
+              {yieldNA ? '—' : `+${formatUsdc(yieldShare, locale)}`}
+            </Text>
           </View>
           <Text style={styles.boostNote}>{t('goals.splitNote')}</Text>
         </View>
@@ -167,11 +181,11 @@ export function GoalDetailScreen() {
         </View>
 
         {/* contributions */}
-        {yieldShare > 0.005 || goal.contribs.length > 0 ? (
+        {(!yieldNA && yieldShare > 0.005) || goal.contribs.length > 0 ? (
           <>
             <Text style={styles.secLabel}>{t('goals.contributions')}</Text>
             <View style={styles.card}>
-              {yieldShare > 0.005 ? (
+              {!yieldNA && yieldShare > 0.005 ? (
                 <View style={styles.cRow}>
                   <View style={[styles.cIc, { backgroundColor: color.greenSoft }]}>
                     <Icon name="earn" size={15} stroke={color.green} />

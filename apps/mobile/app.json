@@ -15,7 +15,8 @@
       }
     },
     "android": {
-      "package": "app.getsava.mobile"
+      "package": "app.getsava.mobile",
+      "permissions": ["POST_NOTIFICATIONS"]
     },
     "web": {
       "bundler": "metro",
@@ -26,6 +27,7 @@
       "expo-web-browser",
       "expo-localization",
       "expo-font",
+      "expo-notifications",
       "./plugins/withExpoSwift5.js"
     ],
     "extra": {

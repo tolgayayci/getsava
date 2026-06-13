@@ -338,7 +338,8 @@ export function Vpos({
   since,
 }: {
   valueUsdc: number;
-  yieldUsdc: number;
+  /** null = N/A (yield not provable on-chain). */
+  yieldUsdc: number | null;
   apy: number;
   since?: string;
 }) {
@@ -364,10 +365,12 @@ export function Vpos({
       <View style={styles.vposGrid}>
         <View style={styles.vpgCell}>
           <Text style={styles.vpgK}>{t('vault.yieldAll')}</Text>
-          <Text style={[styles.vpgV, styles.vpgVGreen]}>
-            +{formatLira(usdcToTry(yieldUsdc), locale)}
+          <Text style={[styles.vpgV, yieldUsdc !== null && styles.vpgVGreen]}>
+            {yieldUsdc === null ? '—' : `+${formatLira(usdcToTry(yieldUsdc), locale)}`}
           </Text>
-          <Text style={styles.vpgS}>+{formatUsdc(yieldUsdc, locale)}</Text>
+          <Text style={styles.vpgS}>
+            {yieldUsdc === null ? '' : `+${formatUsdc(yieldUsdc, locale)}`}
+          </Text>
         </View>
         <View style={[styles.vpgCell, styles.vpgCellRight]}>
           <Text style={styles.vpgK}>{t('vault.supplyApy')}</Text>
@@ -589,7 +592,8 @@ export function VaultSummary({
   apy: number;
   mode: 'supply' | 'withdraw';
   suppliedUsdc?: number;
-  yieldUsdc?: number;
+  /** null/undefined = N/A (yield not provable on-chain). */
+  yieldUsdc?: number | null;
 }) {
   const { t, locale } = useTranslation();
   return (
@@ -605,7 +609,7 @@ export function VaultSummary({
           <Text style={styles.vsumSub} numberOfLines={1}>
             {t('vault.supplied')} {formatLira(usdcToTry(suppliedUsdc ?? 0), locale)} ·{' '}
             <Text style={styles.vsumSubGreen}>
-              +{formatLira(usdcToTry(yieldUsdc ?? 0), locale)}
+              {yieldUsdc == null ? '—' : `+${formatLira(usdcToTry(yieldUsdc), locale)}`}
             </Text>
           </Text>
         ) : (

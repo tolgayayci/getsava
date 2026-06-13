@@ -5,17 +5,19 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import type { Locale } from '../../i18n';
 import { formatLira, formatPct, formatUsdc, useTranslation } from '../../i18n';
-import { usdcToTry } from '../../lib/fx';
+import { CBRT_CURRENT_1Y_RATE, compareBankVsSava } from '../../lib/bankRates';
+import { usdcToTry, useTryRate } from '../../lib/fx';
 import { useVault } from '../../lib/useVault';
 import { useNav } from '../../nav';
 import { Button, Icon, type IconName, NavHeader, Sheet } from '../../ui';
 
-const TERMS: { m: number; k: 't6m' | 't1y' | 't3y' | 't5y' | 't10y' }[] = [
+// Brief: project across 1 / 3 / 6 / 12 months (+ a 5-year long view).
+const TERMS: { m: number; k: 't1m' | 't3m' | 't6m' | 't1y' | 't5y' }[] = [
+  { m: 1, k: 't1m' },
+  { m: 3, k: 't3m' },
   { m: 6, k: 't6m' },
   { m: 12, k: 't1y' },
-  { m: 36, k: 't3y' },
   { m: 60, k: 't5y' },
-  { m: 120, k: 't10y' },
 ];
 
 /**
@@ -33,14 +35,21 @@ export function CalculatorScreen() {
 
   const [start, setStart] = useState(500);
   const [monthly, setMonthly] = useState(50);
-  const [termM, setTermM] = useState(120);
+  const [termM, setTermM] = useState(12);
   const [src, setSrc] = useState<'live' | 'custom'>('live');
   const [customRate, setCustomRate] = useState(8);
   const [picker, setPicker] = useState(false);
 
   const isCustom = src === 'custom';
-  const apy = isCustom ? customRate : (vault?.apy ?? 0);
+  const liveApy = vault?.apy ?? 0;
+  const apy = isCustom ? customRate : liveApy;
   const srcLabel = isCustom ? t('calc.custom') : (vault?.name ?? 'USDC Core');
+
+  // Bank-vs-Sava reality check, in DOLLAR terms, over the real 5-year window
+  // (CBRT/TCMB published lira rates + live USD/TRY). The Sava row uses the SELECTED
+  // rate (live or custom), so the comparison updates with the calculator's rate.
+  const usdTry = useTryRate();
+  const cmp = compareBankVsSava({ principalUsd: start, tryRateNow: usdTry, savaApyPct: apy });
 
   // monthly compounding
   const i = (1 + apy / 100) ** (1 / 12) - 1;
@@ -219,6 +228,44 @@ export function CalculatorScreen() {
           <BrkRow k={t('calc.yield')} usdc={earned} locale={locale} green />
           <BrkRow k={t('calc.future')} usdc={future} locale={locale} total />
         </View>
+
+        {/* Bank-vs-Sava reality check — real data, dollar terms */}
+        <Text style={styles.secLabel}>{t('calc.cmpTitle')}</Text>
+        <View style={styles.cmp}>
+          <Text style={styles.cmpSub}>{t('calc.cmpSub')}</Text>
+          <View style={styles.cmpBase}>
+            <Text style={styles.cmpBaseK}>{t('calc.cmpBaseline')}</Text>
+            <Text style={styles.cmpBaseV}>${usd0(cmp.startUsd)}</Text>
+          </View>
+          <CmpRow
+            label={t('calc.cmpCash')}
+            usd={cmp.cashUsd}
+            pct={cmp.cashPct}
+            hint={t('calc.cmpCashHint')}
+          />
+          <CmpRow
+            label={t('calc.cmpBank')}
+            usd={cmp.bankUsd}
+            pct={cmp.bankPct}
+            hint={t('calc.cmpBankHint')}
+            nominal={t('calc.cmpBankNominal', { lira: formatLira(cmp.bankLiraNow, locale) })}
+          />
+          <CmpRow
+            label={t('calc.cmpSava')}
+            usd={cmp.savaUsd}
+            pct={cmp.savaPct}
+            hint={t('calc.cmpSavaHint')}
+            positive
+          />
+          <View style={styles.cmpFoot}>
+            <Text style={styles.cmpBankRate}>
+              {t('calc.cmpVsBank')} ~{formatPct(CBRT_CURRENT_1Y_RATE * 100, locale)} ·{' '}
+              {t('calc.cmpVsBankSub')}
+            </Text>
+            <Text style={styles.cmpSource}>{t('calc.cmpSource', { rate: usdTry.toFixed(2) })}</Text>
+          </View>
+        </View>
+
         <Text style={styles.projNote}>{t('calc.projNote')}</Text>
       </ScrollView>
 
@@ -338,9 +385,88 @@ function BrkRow({
   );
 }
 
+function CmpRow({
+  label,
+  usd,
+  pct,
+  hint,
+  nominal,
+  positive = false,
+}: {
+  label: string;
+  usd: number;
+  pct: number;
+  hint: string;
+  nominal?: string;
+  positive?: boolean;
+}) {
+  const up = pct >= 0;
+  return (
+    <View style={styles.cmpRow}>
+      <View style={styles.cmpRowTop}>
+        <Text style={styles.cmpLabel}>{label}</Text>
+        <View style={styles.cmpRight}>
+          <Text style={[styles.cmpUsd, positive && styles.cmpUsdPos]}>
+            {positive ? '~' : ''}${Math.round(usd).toLocaleString('en-US')}
+          </Text>
+          <View style={[styles.cmpChip, up ? styles.cmpChipPos : styles.cmpChipNeg]}>
+            <Text style={[styles.cmpChipTxt, up ? styles.cmpChipTxtPos : styles.cmpChipTxtNeg]}>
+              {up ? '+' : ''}
+              {Math.round(pct)}%
+            </Text>
+          </View>
+        </View>
+      </View>
+      {nominal ? <Text style={styles.cmpNominal}>{nominal}</Text> : null}
+      <Text style={styles.cmpHint}>{hint}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   body: { paddingHorizontal: space.gutter, paddingTop: space.s2 },
   flex: { flex: 1 },
+
+  cmp: {
+    backgroundColor: color.surface,
+    borderWidth: 1,
+    borderColor: color.hair,
+    borderRadius: radius.md,
+    padding: space.s4,
+  },
+  cmpSub: { ...type.caption, color: color.inkDim, lineHeight: 18 },
+  cmpBase: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
+    marginTop: space.s3,
+    marginBottom: space.s2,
+  },
+  cmpBaseK: { ...type.micro, color: color.inkFaint, textTransform: 'uppercase', letterSpacing: 1 },
+  cmpBaseV: { fontFamily: font.bold, fontSize: 16, color: color.ink },
+  cmpRow: { borderTopWidth: 1, borderTopColor: color.hairSoft, paddingTop: 12, marginTop: 12 },
+  cmpRowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  cmpLabel: { ...type.bodyStrong, fontSize: 14, color: color.ink, flex: 1 },
+  cmpRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  cmpUsd: { fontFamily: font.extraBold, fontSize: 18, color: color.red },
+  cmpUsdPos: { color: color.green },
+  cmpChip: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+    minWidth: 44,
+    alignItems: 'center',
+  },
+  cmpChipNeg: { backgroundColor: color.redSoft },
+  cmpChipPos: { backgroundColor: color.greenSoft },
+  cmpChipTxt: { fontFamily: font.bold, fontSize: 11.5 },
+  cmpChipTxtNeg: { color: color.red },
+  cmpChipTxtPos: { color: color.green },
+  cmpNominal: { fontFamily: font.mono, fontSize: 11.5, color: color.inkFaint, marginTop: 3 },
+  cmpHint: { ...type.micro, color: color.inkDim, marginTop: 4, lineHeight: 15 },
+  cmpFoot: { marginTop: space.s4, gap: 4 },
+  cmpBankRate: { ...type.micro, fontFamily: font.semiBold, color: color.inkDim },
+  cmpSource: { ...type.micro, color: color.inkFaint, lineHeight: 14 },
 
   proj: {
     backgroundColor: color.surface,

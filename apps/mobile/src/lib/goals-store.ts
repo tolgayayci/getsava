@@ -1,14 +1,16 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { goalsStorage } from './goalsStorage';
 
 export type GoalIcon = 'plane' | 'home' | 'shield' | 'gift' | 'earn' | 'globe';
 export type GoalColor = 'purple' | 'green' | 'blue' | 'amber';
 
-/** One "set aside" event toward a goal (drives the contributions feed). */
+/** One on-chain "add to goal" event (drives the contributions feed). */
 export interface Contribution {
   readonly ts: number;
   readonly usdc: number;
+  /** Stellar tx hash of the on-chain supply that funded this contribution. */
+  readonly hash?: string;
 }
 
 export interface Goal {
@@ -24,19 +26,26 @@ export interface Goal {
   /** Milestone push alerts (25/50/75/100%). */
   readonly notify: boolean;
   readonly createdAt: number;
-  /** Newest-first log of set-aside events. */
+  /** Newest-first log of on-chain contributions (capped). */
   readonly contribs: readonly Contribution[];
+  /** Milestones (25/50/75/100) already notified — dedup so each fires once. */
+  readonly reachedMilestones: readonly number[];
 }
 
 export type NewGoal = Pick<Goal, 'name' | 'icon' | 'color' | 'target' | 'notify'> &
   Partial<Pick<Goal, 'desc'>>;
 
+/** Keep the persisted contribution log bounded (secure-store backup stays small). */
+const MAX_CONTRIBS = 50;
+
 interface GoalsStoreState {
   goals: Goal[];
   /** Append a goal (starts at current 0); returns its id so the caller can open it. */
   addGoal: (g: NewGoal) => string;
-  /** Earmark more USDC principal toward a goal. */
-  addToGoal: (id: string, usdc: number) => void;
+  /** Record a CONFIRMED on-chain supply toward a goal (principal + tx hash). */
+  addToGoal: (id: string, usdc: number, hash?: string) => void;
+  /** Mark milestones as already-notified (dedup for the milestone watcher). */
+  recordMilestones: (id: string, milestones: readonly number[]) => void;
   removeGoal: (id: string) => void;
   toggleNotify: (id: string) => void;
   reset: () => void;
@@ -65,19 +74,34 @@ export const useGoalsStore = create<GoalsStoreState>()(
           current: 0,
           createdAt: Date.now(),
           contribs: [],
+          reachedMilestones: [],
           ...(g.desc ? { desc: g.desc } : {}),
         };
         set((s) => ({ goals: [goal, ...s.goals] }));
         return id;
       },
-      addToGoal: (id, usdc) =>
+      addToGoal: (id, usdc, hash) =>
         set((s) => ({
           goals: s.goals.map((x) =>
             x.id === id
               ? {
                   ...x,
                   current: x.current + usdc,
-                  contribs: [{ ts: Date.now(), usdc }, ...x.contribs],
+                  contribs: [
+                    { ts: Date.now(), usdc, ...(hash ? { hash } : {}) },
+                    ...x.contribs,
+                  ].slice(0, MAX_CONTRIBS),
+                }
+              : x,
+          ),
+        })),
+      recordMilestones: (id, milestones) =>
+        set((s) => ({
+          goals: s.goals.map((x) =>
+            x.id === id
+              ? {
+                  ...x,
+                  reachedMilestones: [...new Set([...(x.reachedMilestones ?? []), ...milestones])],
                 }
               : x,
           ),
@@ -89,7 +113,7 @@ export const useGoalsStore = create<GoalsStoreState>()(
         })),
       reset: () => set({ goals: [] }),
     }),
-    { name: 'sava-goals', storage: createJSONStorage(() => AsyncStorage) },
+    { name: 'sava-goals', storage: createJSONStorage(() => goalsStorage) },
   ),
 );
 
