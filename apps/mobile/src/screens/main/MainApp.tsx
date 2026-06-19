@@ -2,6 +2,8 @@ import { color } from '@getsava/ui';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../../i18n';
+import { useFxFeed } from '../../lib/useFxFeed';
+import { useGoalMilestones } from '../../lib/useGoalMilestones';
 import { type Nav, NavProvider, type StackRoute, useNav } from '../../nav';
 import { TabBar } from '../../ui';
 import { ActivityScreen } from './ActivityScreen';
@@ -101,6 +103,10 @@ function Shell() {
   const nav = useNav();
   const insets = useSafeAreaInsets();
   const isTab = nav.stackTop === null;
+  // Keep the live USDC/TRY rate fresh (CoinGecko/Binance) for every ₺ figure.
+  useFxFeed();
+  // Fire OS notifications when any goal crosses a 25/50/75/100% milestone.
+  useGoalMilestones();
 
   return (
     <View style={styles.root}>

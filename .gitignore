@@ -59,6 +59,9 @@ tmp/
 # Read-only reference MVP (kept on disk, never committed) — see README
 reference-mvp/
 
+# Local-only project guidance (kept on disk, never committed)
+/CLAUDE.md
+
 # Scraped third-party docs (research notes, kept local only)
 .firecrawl/
 

@@ -32,19 +32,27 @@ const TESTNET = {
   poolFactoryId: 'CDV6RX4CGPCOKGTBFS52V3LMWQGZN3LCQTXF5RVPOOCG4XVMHXQ4NTF6',
 } as const;
 
+// Mainnet Blend v2 addresses (blend-utils/mainnet.contracts.json). The launch
+// POOL was selected in T2.D6 (see docs/pool-whitelist.md): "Fixed V2" — the
+// deepest USDC pool (~$53M), which passes the size-aware whitelist on its large
+// absolute backstop (~$3.39M ≥ $1M) despite a low coverage ratio. The app stays
+// on testnet until the T3 feature-flag flip (apps/mobile/src/config/mainnet.ts).
+const MAINNET = {
+  poolId: 'CAJJZSGMMM3PD7N33TAPHGBUGTB43OC73HVIK2L2G6BNGGGYOSSYBXBD',
+  usdcSac: 'CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75',
+  backstopId: 'CAQQR5SWBXKIGZKPBZDH3KM5GQ5GUTPKB7JAFCINLZBC5WXPJKRG3IM7',
+  blndToken: 'CD25MNVTZDL4Y3XBCPCJXGXATV5WUHHOWMYFF4YBEGU5FCPGMYTVG5JY',
+  poolFactoryId: 'CDSYOAVXFY7SM5S64IZPPPYB4GVGGLMQVFREPSQQEZVIWXX5R23G4QSU',
+} as const;
+
 export function blendConfig(network: Network): BlendNetworkConfig {
-  if (network !== 'testnet') {
-    throw new Error(
-      '[sdk-blend] Blend addresses are configured for testnet only (mainnet lands in T3)',
-    );
-  }
   const base = networkConfig(network);
   return {
     network,
     rpcUrl: base.rpcUrl,
     networkPassphrase: base.networkPassphrase,
     usdcDecimals: USDC_DECIMALS,
-    ...TESTNET,
+    ...(network === 'mainnet' ? MAINNET : TESTNET),
   };
 }
 

@@ -54,7 +54,9 @@ export function HomeScreen() {
   const totalUsdc = idle + supplied;
   const rate = position?.rate ?? POOL_RATE;
   const earning = position !== null;
-  const hasYield = earning && yieldUsdc > 0;
+  // null = N/A: yield can't be proven on-chain → show "—", never a fabricated number.
+  const yieldNA = earning && position?.yieldUsdc === null;
+  const hasYield = earning && (yieldUsdc > 0 || yieldNA);
 
   const isUsd = nav.cur === 'usd';
   const total = isUsd ? totalUsdc : usdcToTry(totalUsdc);
@@ -118,7 +120,9 @@ export function HomeScreen() {
           {hasYield ? (
             <View style={styles.earnedLine}>
               <View style={styles.greenDot} />
-              <Text style={styles.earnedAmt}>+{formatLira(usdcToTry(yieldUsdc), locale)}</Text>
+              <Text style={styles.earnedAmt}>
+                {yieldNA ? '—' : `+${formatLira(usdcToTry(yieldUsdc), locale)}`}
+              </Text>
               <Text style={styles.earnedPer}>{t('home.earnedSuffix')}</Text>
             </View>
           ) : (
@@ -202,7 +206,9 @@ export function HomeScreen() {
               </View>
               <View style={styles.mrowRight}>
                 <Text style={styles.mrowVal}>{formatLira(usdcToTry(supplied), locale)}</Text>
-                <Text style={styles.mrowValSubG}>+{formatLira(usdcToTry(yieldUsdc), locale)}</Text>
+                <Text style={styles.mrowValSubG}>
+                  {yieldNA ? '—' : `+${formatLira(usdcToTry(yieldUsdc), locale)}`}
+                </Text>
               </View>
             </Pressable>
           ) : null}

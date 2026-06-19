@@ -7,6 +7,20 @@ compatibility_flags = ["nodejs_compat"]
 # getsava.app zone. The testnet backend serves /docs + /openapi.json here.
 routes = [{ pattern = "api.getsava.app", custom_domain = true }]
 
+# D1 circuit breaker — sample the 3 sources every minute (the continuous monitor
+# behind /circuit/metrics + the read-only dashboard). The scheduled() handler in
+# src/index.ts evaluates + persists + alerts on a fresh trip.
+[triggers]
+crons = ["* * * * *"]
+
+# Durable circuit-breaker metrics (free, built-in Cloudflare D1 / SQLite). The
+# store prefers this binding; with neither DB nor DATABASE_URL it falls back to
+# per-isolate memory. Apply src/circuit/schema.sql with `wrangler d1 execute`.
+[[d1_databases]]
+binding = "DB"
+database_name = "sava-circuit"
+database_id = "30694be6-a9e2-4d5e-a357-bc71a36181b1"
+
 # Non-secret config. Secrets (SEP10_SERVER_SECRET, SEP10_JWT_SECRET,
 # MERCURYO_WIDGET_SECRET, MERCURYO_SIGN_KEY, PRIVY_VERIFICATION_KEY,
 # TREASURY_SECRET, DATABASE_URL) are set with `wrangler secret put` — never here.

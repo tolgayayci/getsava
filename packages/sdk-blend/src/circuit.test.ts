@@ -19,11 +19,23 @@ describe('evaluateCircuitBreaker', () => {
     expect(s.reasons).toEqual([]);
   });
 
-  it('trips on backstop coverage below 8%', () => {
-    const s = evaluateCircuitBreaker({ ...HEALTHY, backstopCoverageUsd: 700 }); // 7%
+  it('trips on backstop coverage below 8% when the backstop is also small', () => {
+    const s = evaluateCircuitBreaker({ ...HEALTHY, backstopCoverageUsd: 700 }); // 7%, $700 abs
     expect(s.tripped).toBe(true);
     expect(s.reasons).toContain('backstop_coverage');
     expect(s.backstopCoverageRatio).toBeCloseTo(0.07, 5);
+  });
+
+  it('does NOT trip a low ratio when the backstop is large in absolute terms (≥ $1M)', () => {
+    // FixedV2-style: 6.3% ratio but $3.39M first-loss capital → not halted.
+    const s = evaluateCircuitBreaker({
+      ...HEALTHY,
+      backstopCoverageUsd: 3_390_000,
+      poolTvlUsd: 53_400_000,
+    });
+    expect(s.backstopCoverageRatio).toBeCloseTo(0.0635, 3);
+    expect(s.reasons).not.toContain('backstop_coverage');
+    expect(s.tripped).toBe(false);
   });
 
   it('trips on bRate drift beyond ±2% over 5 minutes', () => {

@@ -1,17 +1,22 @@
 import { color, radius, space, type } from '@getsava/ui';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTranslation } from '../../i18n';
+import { formatLira, useTranslation } from '../../i18n';
+import { useFxStatus, useTryRate } from '../../lib/fx';
 import { useVaultStore } from '../../lib/vault-store';
 import { useNav } from '../../nav';
 import { Icon, NavHeader } from '../../ui';
 import { ActivityList } from '../../ui/ActivityList';
 
+const FX_LABEL: Record<string, string> = { coingecko: 'CoinGecko', binance: 'Binance' };
+
 export function ActivityScreen() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const nav = useNav();
   const insets = useSafeAreaInsets();
   const activity = useVaultStore((s) => s.activity);
+  const rate = useTryRate();
+  const { source, live } = useFxStatus();
 
   return (
     <>
@@ -30,6 +35,15 @@ export function ActivityScreen() {
           contentContainerStyle={[styles.body, { paddingBottom: insets.bottom + space.s6 }]}
         >
           <ActivityList records={activity} />
+          <View style={styles.fxNote}>
+            <Icon name="info" size={13} stroke={color.inkFaint} />
+            <Text style={styles.fxNoteTx}>
+              {t('activity.fxNote')}
+              {live
+                ? ` · 1 USDC ≈ ${formatLira(rate, locale)} (${FX_LABEL[source] ?? source})`
+                : ''}
+            </Text>
+          </View>
         </ScrollView>
       )}
     </>
@@ -39,6 +53,8 @@ export function ActivityScreen() {
 const styles = StyleSheet.create({
   scroll: { flex: 1 },
   body: { paddingHorizontal: space.gutter, paddingTop: space.s2 },
+  fxNote: { flexDirection: 'row', gap: 7, alignItems: 'flex-start', marginTop: space.s4 },
+  fxNoteTx: { ...type.micro, color: color.inkFaint, flex: 1, lineHeight: 15 },
   empty: {
     flex: 1,
     alignItems: 'center',

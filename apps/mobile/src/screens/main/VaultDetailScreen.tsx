@@ -3,8 +3,10 @@ import * as WebBrowser from 'expo-web-browser';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useWalletStore } from '../../auth';
 import { formatPct, useTranslation } from '../../i18n';
 import { NETWORK } from '../../lib/network';
+import { buildPortfolioSeries, coveredDays } from '../../lib/portfolio-series';
 import {
   buildSeriesFromHistory,
   type ChartPoint,
@@ -16,6 +18,7 @@ import { useVaultStore } from '../../lib/vault-store';
 import { useNav } from '../../nav';
 import { Button, Icon, NavHeader, Notice, UsdcMark } from '../../ui';
 import { ActivityList } from '../../ui/ActivityList';
+import { PortfolioCard } from '../../ui/portfolio-bits';
 import {
   BreakdownBar,
   LearnCard,
@@ -36,6 +39,10 @@ const POOL = 'CAPBMXIQTICKWFPWFDJWMAKBXBPJZUKLNONQH3MLPLLBKQ643CYN5PRW';
 
 function stellarExpertPoolUrl(): string {
   return `https://stellar.expert/explorer/${NETWORK}/contract/${POOL}`;
+}
+
+function stellarExpertAccountUrl(address: string): string {
+  return `https://stellar.expert/explorer/${NETWORK}/account/${address}`;
 }
 
 /** Short axis label for the scrub pill, per timeframe. */
@@ -59,6 +66,8 @@ export function VaultDetailScreen() {
 
   const history = useVaultStore((s) => s.rateHistory);
   const activity = useVaultStore((s) => s.activity);
+  const portfolioHistory = useVaultStore((s) => s.portfolioHistory);
+  const address = useWalletStore((s) => s.address);
   const [learnOpen, setLearnOpen] = useState(false);
   const [tf, setTf] = useState<Timeframe>('1M');
   const [scrubPoint, setScrubPoint] = useState<ChartPoint | null>(null);
@@ -166,6 +175,16 @@ export function VaultDetailScreen() {
           <>
             <Text style={styles.secLabel}>{t('vault.yourPosition')}</Text>
             <Vpos valueUsdc={vault.suppliedUsdc} yieldUsdc={vault.yieldUsdc} apy={vault.apy} />
+            <Text style={styles.secLabel}>{t('portfolio.title')}</Text>
+            <PortfolioCard
+              series={buildPortfolioSeries(portfolioHistory, Date.now(), vault.suppliedUsdc)}
+              valueUsdc={vault.suppliedUsdc}
+              yieldUsdc={vault.yieldUsdc}
+              coveredDays={coveredDays(portfolioHistory, Date.now())}
+              onExplorer={() =>
+                address ? WebBrowser.openBrowserAsync(stellarExpertAccountUrl(address)) : undefined
+              }
+            />
           </>
         ) : null}
 

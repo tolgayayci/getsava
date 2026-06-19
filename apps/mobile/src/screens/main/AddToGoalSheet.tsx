@@ -2,19 +2,24 @@ import { color, font, radius, space, type } from '@getsava/ui';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from '../../i18n';
+import { CircuitTrippedError } from '../../lib/circuit';
 import { useGoalsStore } from '../../lib/goals-store';
+import { useVault } from '../../lib/useVault';
 import { useNav } from '../../nav';
-import { Button, Sheet } from '../../ui';
+import { Button, Icon, Sheet } from '../../ui';
 
 const CHIPS = [25, 50, 100, 250];
 
-/** Bottom sheet to set aside more USDC toward a goal. Shows when the nav sheet
+/** Bottom sheet to add USDC toward a goal. Performs a REAL on-chain supply
+ * (circuit-guarded) and attributes the confirmed principal to the goal, so the
+ * progress bar moves only after the deposit confirms. Shows when the nav sheet
  * id is "addToGoal" (params.id selects the goal). */
 export function AddToGoalSheet() {
   const { t } = useTranslation();
   const nav = useNav();
   const goals = useGoalsStore((s) => s.goals);
   const addToGoal = useGoalsStore((s) => s.addToGoal);
+  const { supply } = useVault();
 
   const visible = nav.sheet?.id === 'addToGoal';
   const id = nav.sheet?.params?.id as string | undefined;
@@ -22,23 +27,35 @@ export function AddToGoalSheet() {
   const name = goal?.name ?? '';
 
   const [amountStr, setAmountStr] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setAmountStr('');
+      setSubmitting(false);
     }
   }, [visible]);
 
   const amount = Number.parseFloat(amountStr) || 0;
-  const valid = amount > 0 && goal !== undefined;
+  const valid = amount > 0 && goal !== undefined && !submitting;
 
-  const submit = () => {
+  const submit = async () => {
     if (!valid || !goal) {
       return;
     }
-    addToGoal(goal.id, amount);
-    nav.closeSheet();
-    nav.toast(t('goals.added', { name }));
+    setSubmitting(true);
+    try {
+      const hash = await supply(amount); // real on-chain supply; throws if halted
+      addToGoal(goal.id, amount, hash);
+      nav.closeSheet();
+      nav.toast(t('goals.added', { name }));
+    } catch (e) {
+      nav.toast(
+        e instanceof CircuitTrippedError ? t('circuit.haltedTitle') : t('goals.fundFailed'),
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -46,7 +63,14 @@ export function AddToGoalSheet() {
       visible={visible}
       onClose={nav.closeSheet}
       title={t('goals.addTitle')}
-      dock={<Button label={t('goals.addCta')} onPress={submit} disabled={!valid} iconName="plus" />}
+      dock={
+        <Button
+          label={submitting ? t('goals.funding') : t('goals.addCta')}
+          onPress={submit}
+          disabled={!valid}
+          iconName="plus"
+        />
+      }
     >
       <Text style={styles.sub}>{t('goals.addSub', { name })}</Text>
 
@@ -76,6 +100,11 @@ export function AddToGoalSheet() {
           </Pressable>
         ))}
       </View>
+
+      <View style={styles.fundNote}>
+        <Icon name="shield" size={13} stroke={color.inkFaint} />
+        <Text style={styles.fundNoteTx}>{t('goals.fundNote')}</Text>
+      </View>
     </Sheet>
   );
 }
@@ -97,6 +126,8 @@ const styles = StyleSheet.create({
   amountInput: { flex: 1, fontFamily: font.extraBold, fontSize: 26, color: color.ink, padding: 0 },
   amountSuf: { fontFamily: font.semiBold, fontSize: 15, color: color.inkFaint },
   chips: { flexDirection: 'row', gap: 8, marginTop: space.s4, marginBottom: space.s2 },
+  fundNote: { flexDirection: 'row', gap: 7, alignItems: 'flex-start', marginTop: space.s3 },
+  fundNoteTx: { ...type.micro, color: color.inkFaint, flex: 1, lineHeight: 15 },
   chip: {
     flex: 1,
     height: 40,

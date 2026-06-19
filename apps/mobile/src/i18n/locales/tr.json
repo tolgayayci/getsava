@@ -377,7 +377,8 @@
     "yield": "Getiri kazanıldı",
     "emptyTitle": "Henüz işlem yok",
     "emptyBody": "Lira eklediğinizde, sağladığınızda, çektiğinizde veya kazandığınızda burada görünür.",
-    "variableNote": "Getiri değişkendir ve her gün değişir."
+    "variableNote": "Getiri değişkendir ve her gün değişir.",
+    "fxNote": "₺ tutarları her işlemin gerçekleştiği andaki kurdandır — CoinGecko, yedek Binance."
   },
   "chart": {
     "d1": "1G",
@@ -415,7 +416,22 @@
     "yield": "Getiri",
     "pickNote": "Canlı oranını kullanmak için bir Sava kasası seçin ya da senaryo için kendi oranınızı girin.",
     "projNote": "Seçili değişken oranla, aylık bileşik getiriye göre hesaplanır. Oran her gün değişir ve asla garanti edilmez; gerçek sonuçlar farklı olacaktır.",
-    "openEarn": "Kazanmaya başla"
+    "openEarn": "Kazanmaya başla",
+    "t1m": "1 ay",
+    "t3m": "3 ay",
+    "cmpTitle": "Son 5 yıl, dolar olarak",
+    "cmpSub": "Aynı başlangıç parası üç farklı yerde — lira değil, dolar olarak.",
+    "cmpBaseline": "Başlangıç",
+    "cmpCash": "Yastık altı nakit",
+    "cmpCashHint": "Lira olduğu yerde durdu, değeri eridi.",
+    "cmpBank": "Türk bankasında",
+    "cmpBankNominal": "{lira} görünür",
+    "cmpBankHint": "Lira olarak büyük — dolar olarak çok daha küçük.",
+    "cmpSava": "Sava'da (USDC)",
+    "cmpSavaHint": "Dolar bazlı; değerini korudu ve dolar olarak büyüdü.",
+    "cmpVsBank": "Türk bankası",
+    "cmpVsBankSub": "1 yıllık lira oranı · TCMB",
+    "cmpSource": "Gerçek veri: TCMB / CBRT 1 yıllık lira banka oranları (2021–2025) + yıl sonu USD/TRY · canlı ₺{rate}."
   },
   "goals": {
     "title": "Hedefler",
@@ -461,11 +477,28 @@
     "addSub": "Bakiyenizin bir kısmını {name} için ayırın.",
     "addCta": "Hedefe ekle",
     "added": "{name} hedefine eklendi",
+    "funding": "Ekleniyor…",
+    "fundFailed": "Hedefe eklenemedi — tekrar deneyin.",
+    "fundNote": "Zincir üstünde USDC kasanıza eklenir — bu hedef için getiri kazanmaya başlar.",
     "pushApp": "SAVA",
     "pushNow": "şimdi",
     "pushReached": "Hedefe ulaşıldı 🎉",
     "pushReachedBody": "{name} hedefinize ulaştınız. Tebrikler.",
     "pushMilestone": "Kilometre taşına ulaşıldı",
     "pushMilestoneBody": "{name} hedefinde %{pct} tamamlandı."
+  },
+  "circuit": {
+    "haltedTitle": "Sağlamalar duraklatıldı — paranız güvende",
+    "haltedBody": "Bir güvenlik kontrolü yeni sağlamaları duraklattı. Pozisyonunuz kazanmaya devam eder ve çekimler açık kalır.",
+    "depositsPaused": "Sağlamalar duraklatıldı"
+  },
+  "portfolio": {
+    "title": "Portföy",
+    "window": "Son 90 gün",
+    "valueNow": "Şu anki değer",
+    "principal": "Anapara",
+    "yieldLabel": "Getiri",
+    "onchain": "Zincir üstü pozisyonunuzla eşleşir",
+    "history": "{days} günlük geçmiş"
   }
 }

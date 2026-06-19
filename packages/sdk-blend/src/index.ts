@@ -17,6 +17,8 @@ export {
 } from './circuit';
 export { type BlendNetworkConfig, blendConfig, blendNetwork, USDC_DECIMALS } from './config';
 export { ALLOWED_REQUEST_TYPES, assertSafeRequestType, type SafeRequestType } from './guardrail';
+export { type PoolHealthSample, readPoolHealthSample, toCircuitInputs } from './health';
+export { readOraclePrice } from './oracle';
 export {
   getReserve,
   getSupplyApy,
@@ -29,3 +31,12 @@ export {
 export { supplyRequest, type WithdrawMode, withdrawRequest } from './request';
 export { type SubmitResult, signAndSubmit } from './submit';
 export { type BuildResult, buildSupplyTx, buildWithdrawTx, submitOpXdr } from './tx';
+export {
+  assertPoolWhitelisted,
+  isPoolWhitelisted,
+  POOL_WHITELIST,
+  type RuleResult,
+  scorePoolAgainstWhitelist,
+  type WhitelistRule,
+  type WhitelistScore,
+} from './whitelist';

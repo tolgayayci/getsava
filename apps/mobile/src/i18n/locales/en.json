@@ -377,7 +377,8 @@
     "yield": "Yield earned",
     "emptyTitle": "No activity yet",
     "emptyBody": "When you add lira, supply, withdraw or earn, it shows up here.",
-    "variableNote": "Yield is variable and moves daily."
+    "variableNote": "Yield is variable and moves daily.",
+    "fxNote": "₺ shown at the rate when each transaction happened — CoinGecko, Binance fallback."
   },
   "chart": {
     "d1": "1D",
@@ -415,7 +416,22 @@
     "yield": "Yield",
     "pickNote": "Pick a Sava vault to use its live rate, or enter your own to model a scenario.",
     "projNote": "Based on monthly compounding at the selected variable rate. The rate changes daily and is never guaranteed, so real results will differ.",
-    "openEarn": "Start earning"
+    "openEarn": "Start earning",
+    "t1m": "1 mo",
+    "t3m": "3 mo",
+    "cmpTitle": "The last 5 years, in dollars",
+    "cmpSub": "The same starting money in three places — measured in dollars, not lira.",
+    "cmpBaseline": "Started with",
+    "cmpCash": "Cash, under the mattress",
+    "cmpCashHint": "The lira just sat there while it lost value.",
+    "cmpBank": "In a Turkish bank",
+    "cmpBankNominal": "Shows as {lira}",
+    "cmpBankHint": "Big in lira — far smaller once you count it in dollars.",
+    "cmpSava": "In Sava (USDC)",
+    "cmpSavaHint": "Dollar-stable, so it held its value and grew in dollars.",
+    "cmpVsBank": "Turkish bank",
+    "cmpVsBankSub": "1-yr lira rate · TCMB",
+    "cmpSource": "Real data: TCMB / CBRT 1-year lira bank rates (2021–2025) + year-end USD/TRY · live ₺{rate}."
   },
   "goals": {
     "title": "Goals",
@@ -461,11 +477,28 @@
     "addSub": "Set aside part of your balance toward {name}.",
     "addCta": "Add to goal",
     "added": "Added to {name}",
+    "funding": "Adding…",
+    "fundFailed": "Couldn't add to goal — try again.",
+    "fundNote": "Supplied on-chain to your USDC vault — it starts earning yield toward this goal.",
     "pushApp": "SAVA",
     "pushNow": "now",
     "pushReached": "Goal reached 🎉",
     "pushReachedBody": "You hit your {name} goal. Nice work.",
     "pushMilestone": "Milestone reached",
     "pushMilestoneBody": "You're {pct}% of the way to {name}."
+  },
+  "circuit": {
+    "haltedTitle": "Supplies paused — your funds are safe",
+    "haltedBody": "A safety check paused new supplies. Your position keeps earning and withdrawals stay open.",
+    "depositsPaused": "Supplies paused"
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "window": "Last 90 days",
+    "valueNow": "Value now",
+    "principal": "Principal",
+    "yieldLabel": "Yield",
+    "onchain": "Matches your on-chain position",
+    "history": "{days}d of history"
   }
 }

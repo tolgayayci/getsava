@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatLira, formatPct, useTranslation } from '../../i18n';
+import { useCircuit } from '../../lib/circuit';
 import { usdcToTry } from '../../lib/fx';
 import { useVault } from '../../lib/useVault';
 import { useNav } from '../../nav';
@@ -26,6 +27,7 @@ export function EarnScreen() {
   const nav = useNav();
   const insets = useSafeAreaInsets();
   const { vault, loading, error, refresh } = useVault();
+  const circuit = useCircuit();
 
   const held = vault?.supplied ?? false;
   const openVault = () => nav.push('vault');
@@ -43,6 +45,16 @@ export function EarnScreen() {
           <RefreshControl refreshing={loading} onRefresh={refresh} tintColor={color.inkDim} />
         }
       >
+        {circuit.tripped ? (
+          <View style={styles.errWrap}>
+            <Notice
+              tone="red"
+              icon="alert"
+              title={t('circuit.haltedTitle')}
+              body={t('circuit.haltedBody')}
+            />
+          </View>
+        ) : null}
         {error ? (
           <View style={styles.errWrap}>
             <Notice tone="red" icon="alert" title={t('earn.errTitle')} body={t('earn.errBody')} />
@@ -61,8 +73,11 @@ export function EarnScreen() {
                 </Text>
                 <View style={styles.heroSub}>
                   <View style={styles.greenDot} />
+                  {/* null → N/A: never show a yield we can't prove on-chain */}
                   <Text style={styles.heroYield}>
-                    +{formatLira(usdcToTry(vault.yieldUsdc), locale)}
+                    {vault.yieldUsdc === null
+                      ? '—'
+                      : `+${formatLira(usdcToTry(vault.yieldUsdc), locale)}`}
                   </Text>
                   <Text style={styles.heroDot}>·</Text>
                   <Text style={styles.heroApy}>
