@@ -160,7 +160,7 @@ export function GoalDetailScreen() {
         </View>
 
         {/* milestone alerts */}
-        <View style={styles.card}>
+        <View style={[styles.card, styles.cardGap]}>
           <View style={styles.dRow}>
             <View style={styles.dLeft}>
               <Text style={styles.dKey}>{t('goals.milestones')}</Text>
@@ -220,7 +220,7 @@ export function GoalDetailScreen() {
 
       {/* push preview overlay */}
       {preview ? (
-        <View style={[styles.pushWrap, { top: space.s2 }]} pointerEvents="none">
+        <View style={[styles.pushWrap, { top: insets.top + space.s2 }]} pointerEvents="none">
           <View style={styles.push}>
             <View style={styles.pushHead}>
               <View style={styles.pushBadge}>
@@ -328,6 +328,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     paddingHorizontal: space.s4,
   },
+  cardGap: { marginTop: space.s3 },
   dRow: {
     flexDirection: 'row',
     alignItems: 'center',

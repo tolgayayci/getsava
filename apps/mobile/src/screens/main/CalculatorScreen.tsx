@@ -39,6 +39,7 @@ export function CalculatorScreen() {
   const [src, setSrc] = useState<'live' | 'custom'>('live');
   const [customRate, setCustomRate] = useState(8);
   const [picker, setPicker] = useState(false);
+  const [cardSize, setCardSize] = useState({ w: 0, h: 0 });
 
   const isCustom = src === 'custom';
   const liveApy = vault?.apy ?? 0;
@@ -62,21 +63,34 @@ export function CalculatorScreen() {
   const termKey = TERMS.find((x) => x.m === termM)?.k ?? 't1y';
   const termLabel = t(`calc.${termKey}` as Parameters<typeof t>[0]);
 
-  // sparkline points + paths (viewBox 0..100, non-scaling stroke)
-  const points = Math.min(termM, 60) + 1;
-  const series = Array.from({ length: points }, (_, k) =>
-    balAt(Math.round((k / (points - 1)) * termM)),
-  );
+  // Smooth compound-growth line: the projected balance sampled across the term
+  // (monthly for a year), drawn as a smooth rising curve + filled area. The
+  // curve bows upward as the rate compounds (pronounced at higher rates).
+  const steps = Math.min(termM, 60);
+  const series = Array.from({ length: steps + 1 }, (_, k) => balAt((k / steps) * termM));
   const vMin = series[0] ?? 0;
-  const vMax = series[points - 1] ?? 1;
-  const padV = (vMax - vMin) * 0.1 || vMax * 0.1 || 1;
+  const vMax = series[steps] ?? vMin + 1;
+  const padV = (vMax - vMin) * 0.12 || vMax * 0.12 || 1;
   const lo = Math.max(0, vMin - padV);
   const hi = vMax + padV;
-  const xAt = (k: number) => (k / (points - 1)) * 100;
-  const yAt = (v: number) => 92 - ((v - lo) / (hi - lo || 1)) * 82;
-  const line = series
-    .map((v, k) => `${k ? 'L' : 'M'}${xAt(k).toFixed(2)} ${yAt(v).toFixed(2)}`)
-    .join(' ');
+  const pts = series.map((v, k) => ({
+    x: (k / steps) * 100,
+    y: 90 - ((v - lo) / (hi - lo || 1)) * 80,
+  }));
+  // Catmull-Rom → cubic-bezier smoothing for a clean curve through the points.
+  const at = (idx: number) => pts[Math.max(0, Math.min(pts.length - 1, idx))] ?? { x: 0, y: 90 };
+  let line = `M${at(0).x.toFixed(2)} ${at(0).y.toFixed(2)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = at(i - 1);
+    const p1 = at(i);
+    const p2 = at(i + 1);
+    const p3 = at(i + 2);
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    line += ` C${c1x.toFixed(2)} ${c1y.toFixed(2)} ${c2x.toFixed(2)} ${c2y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+  }
   const area = `${line} L100 100 L0 100 Z`;
 
   const usd0 = (n: number) => Math.round(n).toLocaleString('en-US');
@@ -95,33 +109,48 @@ export function CalculatorScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* Projection card */}
-        <View style={styles.proj}>
-          <Svg style={styles.projBg} width="100%" height="100%" preserveAspectRatio="none">
-            <Defs>
-              <LinearGradient id="projBg" x1="0" y1="0" x2="0.3" y2="1">
-                <Stop offset="0%" stopColor={color.purple2} stopOpacity={0.45} />
-                <Stop offset="100%" stopColor={color.purple} stopOpacity={0.04} />
-              </LinearGradient>
-            </Defs>
-            <Rect x={0} y={0} width="100%" height="100%" fill="url(#projBg)" />
-          </Svg>
+        <View
+          style={styles.proj}
+          onLayout={(e) => {
+            const { width, height } = e.nativeEvent.layout;
+            setCardSize((s) => (s.w === width && s.h === height ? s : { w: width, h: height }));
+          }}
+        >
+          {cardSize.w > 0 ? (
+            <Svg style={styles.projBg} width={cardSize.w} height={cardSize.h}>
+              <Defs>
+                <LinearGradient
+                  id="projBg"
+                  x1={0}
+                  y1={0}
+                  x2={0}
+                  y2={cardSize.h}
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <Stop offset="0%" stopColor={color.purple2} stopOpacity={0.32} />
+                  <Stop offset="100%" stopColor={color.purple} stopOpacity={0} />
+                </LinearGradient>
+              </Defs>
+              <Rect x={0} y={0} width={cardSize.w} height={cardSize.h} fill="url(#projBg)" />
+            </Svg>
+          ) : null}
           <Text style={styles.projK}>
             {t('calc.future')} · {termLabel}
           </Text>
-          <Text style={styles.projVal}>
-            {formatUsdc(future, locale, false)}
-            <Text style={styles.projUnit}> USDC</Text>
-          </Text>
+          <View style={styles.projValRow}>
+            <Text style={styles.projVal}>{formatUsdc(future, locale, false)}</Text>
+            <Text style={styles.projUnit}>USDC</Text>
+          </View>
           <View style={styles.projSub}>
             <Text style={styles.projGain}>+{formatUsdc(earned, locale, false)} USDC</Text>
             <Text style={styles.projDot}>·</Text>
             <Text style={styles.projTry}>≈ {formatLira(usdcToTry(future), locale)}</Text>
           </View>
           <View style={styles.spark}>
-            <Svg width="100%" height={66} viewBox="0 0 100 100" preserveAspectRatio="none">
+            <Svg width="100%" height={78} viewBox="0 0 100 100" preserveAspectRatio="none">
               <Defs>
                 <LinearGradient id="calcGrad" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0%" stopColor={color.purple} stopOpacity={0.3} />
+                  <Stop offset="0%" stopColor={color.purple} stopOpacity={0.34} />
                   <Stop offset="100%" stopColor={color.purple} stopOpacity={0} />
                 </LinearGradient>
               </Defs>
@@ -129,7 +158,7 @@ export function CalculatorScreen() {
               <Path
                 d={line}
                 stroke={color.purple}
-                strokeWidth={2}
+                strokeWidth={2.5}
                 fill="none"
                 vectorEffect="non-scaling-stroke"
                 strokeLinejoin="round"
@@ -484,19 +513,19 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     color: color.inkFaint,
   },
+  projValRow: { flexDirection: 'row', alignItems: 'baseline', marginTop: space.s2 },
   projVal: {
     fontFamily: font.extraBold,
     fontSize: 36,
     color: color.ink,
     letterSpacing: -1,
-    marginTop: space.s2,
   },
-  projUnit: { fontFamily: font.bold, fontSize: 18, color: color.inkFaint },
+  projUnit: { fontFamily: font.bold, fontSize: 22, color: color.inkDim, marginLeft: 9 },
   projSub: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 6 },
   projGain: { fontFamily: font.bold, fontSize: 13.5, color: color.green },
   projDot: { ...type.body, color: color.inkFaint },
   projTry: { fontFamily: font.mono, fontSize: 12.5, color: color.inkDim },
-  spark: { marginTop: space.s4, height: 66 },
+  spark: { marginTop: space.s4, height: 78, marginHorizontal: -space.s5, marginBottom: -space.s5 },
 
   tabs: { flexDirection: 'row', gap: 6, marginTop: space.s4 },
   tab: {

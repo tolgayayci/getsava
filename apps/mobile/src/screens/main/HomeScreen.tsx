@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useWalletStore } from '../../auth';
 import type { Locale } from '../../i18n';
 import { formatLira, formatPct, formatUsdc, liraParts, useTranslation } from '../../i18n';
+import { useCircuit } from '../../lib/circuit';
 import { usdcToTry } from '../../lib/fx';
 import { useBalances } from '../../lib/useBalances';
 import { usePosition } from '../../lib/usePosition';
@@ -47,6 +48,7 @@ export function HomeScreen() {
   const email = useWalletStore((s) => s.email);
   const { balances, loading, error, refresh } = useBalances();
   const position = usePosition();
+  const circuit = useCircuit();
 
   const idle = Number.parseFloat(balances.usdc || '0');
   const supplied = position?.suppliedUsdc ?? 0;
@@ -214,8 +216,19 @@ export function HomeScreen() {
           ) : null}
         </View>
 
-        {/* savings goals */}
-        <GoalsHome />
+        {/* savings goals — replaced by the safety alert while the breaker is tripped */}
+        {circuit.tripped ? (
+          <View style={styles.haltCard}>
+            <Notice
+              tone="red"
+              icon="alert"
+              title={t('circuit.haltedTitle')}
+              body={t('circuit.haltedBody')}
+            />
+          </View>
+        ) : (
+          <GoalsHome />
+        )}
       </ScrollView>
     </>
   );
@@ -242,6 +255,7 @@ const styles = StyleSheet.create({
   wordmarkV: { color: color.purple },
   scroll: { flex: 1 },
   body: { paddingHorizontal: space.gutter },
+  haltCard: { marginTop: space.s7 },
 
   heroWrap: { alignItems: 'center', paddingTop: space.s4 },
   ratePill: {

@@ -21,8 +21,12 @@ export async function loadNotifications(): Promise<NotificationsModule | null> {
     if (!handlerReady) {
       handlerReady = true;
       N.setNotificationHandler({
+        // In the FOREGROUND, suppress iOS's own banner — it pins to the top over
+        // the Dynamic Island and reads badly; we show a readable in-app card
+        // instead. Backgrounded/locked notifications are unaffected (this handler
+        // only runs in the foreground) and still banner normally + land in the list.
         handleNotification: async () => ({
-          shouldShowBanner: true,
+          shouldShowBanner: false,
           shouldShowList: true,
           shouldPlaySound: true,
           shouldSetBadge: false,
