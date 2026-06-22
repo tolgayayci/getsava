@@ -67,7 +67,7 @@ export const MAINNET_CANDIDATES: readonly PoolScore[] = [
   },
   {
     name: 'CDMAVJPF…',
-    id: 'CDMAVJPF',
+    id: 'CDMAVJPFXPADND3YRL4BSM3AKZWCTFMX27GLLXCML3PD62HEQS5FPVAI',
     tvlUsdc: 34_698,
     backstopCoverage: 0.954,
     poolStatus: 1,
