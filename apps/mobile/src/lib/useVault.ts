@@ -14,6 +14,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { useWalletStore } from '../auth';
 import { useSignRawHash } from '../auth/privy-hooks';
+import { reconstructBasisUsdc } from './basisRecovery';
 import { assertSupplyAllowed } from './circuit';
 import { usdcToTry } from './fx';
 import { NETWORK } from './network';
@@ -95,6 +96,7 @@ export function useVault(): UseVault {
   const addWithdraw = useVaultStore((s) => s.addWithdraw);
   const recordRate = useVaultStore((s) => s.recordRate);
   const recordPortfolio = useVaultStore((s) => s.recordPortfolio);
+  const ensureBasis = useVaultStore((s) => s.ensureBasis);
 
   const [snap, setSnap] = useState<ReserveSnapshot | null>(null);
   const [pos, setPos] = useState<UserPosition | null>(null);
@@ -115,6 +117,12 @@ export function useVault(): UseVault {
       recordRate(snapshot.supplyApy * 100, Date.now());
       const position = await readUserPosition(pool, address, cfg.usdcSac);
       setPos(position);
+      // Reconstruct the true cost basis from on-chain history (received − sent −
+      // wallet) so earned = poolValue − basis is the real number, even for
+      // positions supplied before tracking / after a reinstall. Null on failure
+      // → keep the existing basis.
+      const recovered = await reconstructBasisUsdc(NETWORK, address).catch(() => null);
+      ensureBasis(position.suppliedUsdc, snapshot.bRate, recovered);
       // Sample the REAL on-chain position value for the 90-day portfolio chart.
       recordPortfolio(position.suppliedUsdc, useVaultStore.getState().netPrincipalUsdc, Date.now());
     } catch {
@@ -122,7 +130,7 @@ export function useVault(): UseVault {
     } finally {
       setLoading(false);
     }
-  }, [address, recordRate, recordPortfolio]);
+  }, [address, recordRate, recordPortfolio, ensureBasis]);
 
   useEffect(() => {
     void refresh();

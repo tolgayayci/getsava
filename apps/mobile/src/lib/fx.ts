@@ -25,7 +25,14 @@ export function useTryRate(): number {
   return useFxStore((s) => s.rate);
 }
 
-/** Reactive FX status: which source, whether it's a real live quote, and freshness. */
+/**
+ * Reactive FX status: which source, whether it's a real live quote, and freshness.
+ * Selects each field separately — a selector returning a new object literal breaks
+ * useSyncExternalStore's snapshot caching and causes an infinite render loop.
+ */
 export function useFxStatus(): { source: string; live: boolean; ts: number } {
-  return useFxStore((s) => ({ source: s.source, live: s.live, ts: s.ts }));
+  const source = useFxStore((s) => s.source);
+  const live = useFxStore((s) => s.live);
+  const ts = useFxStore((s) => s.ts);
+  return { source, live, ts };
 }

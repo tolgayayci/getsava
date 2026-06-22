@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { vaultStorage } from './vault-storage';
+import { basisOverclaims } from './yield-calc';
 
 /** Money-timeline event kinds (Activity screen / D4). */
 export type ActivityType = 'supplied' | 'withdrew' | 'added' | 'yield' | 'sent';
@@ -58,6 +59,16 @@ interface VaultStoreState {
   portfolioHistory: PortfolioSample[];
   addSupply: (usdc: number, tryAtTx: number, hash: string, ts: number) => void;
   addWithdraw: (usdc: number, tryAtTx: number, hash: string, ts: number, full: boolean) => void;
+  /**
+   * Bootstrap the cost basis from the chain when none is recorded — adopts the
+   * current on-chain value as the basis so an untracked position (supplied before
+   * tracking, after a reinstall, or outside the app) reports a PROVABLE yield
+   * (0 now, accruing from here) instead of N/A. Prefers the Horizon-reconstructed
+   * basis (`recovered`, the on-chain source of truth) whenever it's available and
+   * physically sane; falls back to bootstrapping from the current value only when
+   * there's no basis and no reconstruction.
+   */
+  ensureBasis: (currentUsdc: number, bRate: bigint, recovered: number | null) => void;
   /** Record a card/wallet deposit (USDC in). Deduped by id (e.g. order id). */
   addDeposit: (
     id: string,
@@ -115,6 +126,29 @@ export const useVaultStore = create<VaultStoreState>()(
           netPrincipalUsdc: full ? 0 : Math.max(0, s.netPrincipalUsdc - usdc),
           activity: [{ id: hash, type: 'withdrew', usdc, tryAtTx, hash, ts }, ...s.activity],
         })),
+      ensureBasis: (currentUsdc, bRate, recovered) =>
+        set((s) => {
+          if (currentUsdc <= 1e-7) {
+            return s;
+          }
+          // On-chain reconstruction is authoritative when present and sane
+          // (implies non-negative yield within the on-chain ceiling). Adopt it
+          // so the off-chain counter can't drift the displayed earnings.
+          if (
+            recovered != null &&
+            recovered > 1e-7 &&
+            !basisOverclaims(currentUsdc, bRate, recovered)
+          ) {
+            return Math.abs(recovered - s.netPrincipalUsdc) > 1e-6
+              ? { netPrincipalUsdc: recovered }
+              : s;
+          }
+          // No reliable reconstruction: bootstrap only if we have no basis at all.
+          if (s.netPrincipalUsdc <= 0) {
+            return { netPrincipalUsdc: currentUsdc };
+          }
+          return s;
+        }),
       addDeposit: (id, usdc, tryAtTx, hash, ts, source) =>
         set((s) => {
           if (s.activity.some((a) => a.id === id)) {

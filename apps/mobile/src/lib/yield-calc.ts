@@ -20,6 +20,27 @@ const BRATE_SCALE = 1e12;
 const DUST = 1e-7;
 const EPS = 1e-6;
 
+/**
+ * Physical upper bound on a position's yield: the gain if every bToken were
+ * bought at par (pool inception). Actual yield can never exceed this.
+ */
+export function onChainYieldCeiling(suppliedUsdc: number, bRate: bigint): number {
+  const bRateFloat = Number(bRate) / BRATE_SCALE;
+  return bRateFloat > 1 ? suppliedUsdc * (1 - 1 / bRateFloat) : 0;
+}
+
+/** True when the recorded basis claims more yield than the chain allows (stale). */
+export function basisOverclaims(
+  suppliedUsdc: number,
+  bRate: bigint,
+  netPrincipalUsdc: number,
+): boolean {
+  if (netPrincipalUsdc <= 0 || suppliedUsdc <= DUST) {
+    return false;
+  }
+  return suppliedUsdc - netPrincipalUsdc > onChainYieldCeiling(suppliedUsdc, bRate) + EPS;
+}
+
 export function deriveYieldUsdc(
   suppliedUsdc: number,
   bRate: bigint,
@@ -39,9 +60,7 @@ export function deriveYieldUsdc(
   if (costBasisYield <= DUST) {
     return 0; // at/under basis → nothing earned yet (or rounding)
   }
-  const bRateFloat = Number(bRate) / BRATE_SCALE;
-  const maxOnChainYield = bRateFloat > 1 ? suppliedUsdc * (1 - 1 / bRateFloat) : 0;
-  if (costBasisYield > maxOnChainYield + EPS) {
+  if (costBasisYield > onChainYieldCeiling(suppliedUsdc, bRate) + EPS) {
     return null; // claims more yield than the chain allows → basis is stale → N/A
   }
   return costBasisYield;
