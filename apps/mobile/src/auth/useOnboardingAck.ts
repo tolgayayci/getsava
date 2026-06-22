@@ -7,6 +7,8 @@ export interface UseOnboardingAck {
   /** null while loading from storage, then the persisted boolean. */
   acknowledged: boolean | null;
   acknowledge: () => void;
+  /** Clear the persisted ack so onboarding shows again (dev/QA reset). */
+  reset: () => void;
 }
 
 /**
@@ -28,5 +30,10 @@ export function useOnboardingAck(): UseOnboardingAck {
     AsyncStorage.setItem(ACK_KEY, 'true').catch(() => {});
   }, []);
 
-  return { acknowledged, acknowledge };
+  const reset = useCallback(() => {
+    setAcknowledged(false);
+    AsyncStorage.removeItem(ACK_KEY).catch(() => {});
+  }, []);
+
+  return { acknowledged, acknowledge, reset };
 }

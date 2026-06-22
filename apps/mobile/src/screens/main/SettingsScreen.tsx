@@ -1,6 +1,7 @@
 import { color, radius, space, type } from '@getsava/ui';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { DevSettings, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSession, useWalletStore } from '../../auth';
 import { privyEmail, usePrivy } from '../../auth/privy-hooks';
@@ -21,6 +22,17 @@ export function SettingsScreen() {
   const address = useWalletStore((s) => s.address) ?? '';
   const email = useWalletStore((s) => s.email) ?? privyEmail(user);
   const [sheet, setSheet] = useState<null | 'signout'>(null);
+
+  // Dev/QA only: sign out + wipe persisted state + reload → lands on onboarding.
+  const devReset = async () => {
+    try {
+      await Promise.resolve(signOut());
+    } catch {}
+    try {
+      await AsyncStorage.clear();
+    } catch {}
+    DevSettings.reload();
+  };
 
   const legal: Array<{ key: string; label: string }> = [
     { key: 'terms', label: t('settings.terms') },
@@ -95,6 +107,16 @@ export function SettingsScreen() {
             <Text style={[styles.rowTitle, { color: color.red }]}>{t('settings.signOut')}</Text>
           </Pressable>
         </View>
+        {__DEV__ ? (
+          <View style={[styles.group, { marginTop: space.s3 }]}>
+            <Pressable style={styles.row} onPress={devReset}>
+              <View style={styles.rowIc}>
+                <Icon name="refresh" size={17} stroke={color.inkDim} />
+              </View>
+              <Text style={styles.rowTitle}>Reset onboarding & app state (dev)</Text>
+            </Pressable>
+          </View>
+        ) : null}
         <Text style={styles.version}>{t('settings.version')} 1.0.0 (1)</Text>
       </ScrollView>
 

@@ -62,6 +62,17 @@ reference-mvp/
 # Local-only project guidance (kept on disk, never committed)
 /CLAUDE.md
 
+# Local-only web design-system mirror for claude.ai/design (react-native-web bridge)
+/design-web/
+# Local-only claude.ai/design sync config (points at /design-web)
+/.design-sync/
+
+# Local-only D5 cohort simulation (testnet E2E proof + report) — never committed
+/cohort-sim/
+packages/sdk-blend/scripts/cohort-sim.ts
+packages/sdk-blend/scripts/position.ts
+packages/sdk-blend/scripts/reward-zone.ts
+
 # Scraped third-party docs (research notes, kept local only)
 .firecrawl/
 
